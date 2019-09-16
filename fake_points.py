@@ -8,10 +8,11 @@ class FakeInternetPoints(object):
         Atributes:
         awarder(str): The initator for change in FakeInternetPoints
         msg(str): The message posted by the bot
-        subjects(list): Single or group of people affected by the awarder
 
         Methods:
-        process_command: 
+        check_valid_user: Verifies the user isn't giving themselves points
+        process_command: Counts the qualifiers in a command
+        set_user_points:
 
         Note:
         Fake internet points are really the main goal here.
@@ -21,11 +22,20 @@ class FakeInternetPoints(object):
         """
 
     def __init__(self, message):
+        self._subjects = message.target_users
         self.awarder = message.user
         self.change = self.process_command(message.command)
-        self.subjects = message.target_users
+        self.msg = self.check_valid_user(message)
+
+    def check_valid_user(self, message):
+        if self.awarder in self.sunjects:
+            _msg = "<@{0}> You are not allowed to assign yourself points."
+            msg = _msg.format(self.awarder)
+        else:
+            msg = self.set_user_points()
 
     def process_command(self, message):
+        ''' Hardcoded to only allow a change of 5 or -5 '''
         _change = 0
         for value in message:
             if value == "+":
@@ -38,4 +48,5 @@ class FakeInternetPoints(object):
             _change = 5
         return _change
 
+    def set_user_points(self, message):
 
