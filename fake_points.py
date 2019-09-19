@@ -40,7 +40,12 @@ class FakeInternetPoints(object):
     def process_command(self, message):
         ''' Hardcoded to only allow a change of 5 or -5 '''
         _change = 0
+        count = 0
         for value in message:
+            if count == 0:
+                count += 1
+                #  skip the first record so it requires two ++ to get a point
+                continue
             if value == "+":
                 _change += 1
             if value == "-":
