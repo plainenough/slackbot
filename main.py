@@ -137,7 +137,6 @@ def catch_message(**payload):
         return
     elif data.get('subtype') == 'bot_message':
         return
-    print(payload)
     message = Message(data)
     logging.debug(message)
     if message.banned:
