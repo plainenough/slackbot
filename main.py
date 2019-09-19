@@ -105,6 +105,9 @@ class Message(object):
         for value in text.split(' '):
             if value in COMMANDS:
                 command = value
+            if value.startswith('-') or value.startswith('+'):
+                logging.info('Detected fake_points event')
+                command = "fake_points"
         return command
 
     def check_users(self, text):
@@ -114,6 +117,10 @@ class Message(object):
         reg = re.compile('<@.*>')
         for value in text.split(' '):
             if reg.match(value):
+                if value in target_users:
+                    #  This little gem is to prevent multiple entries for
+                    #  a user in the list inspired by Dylan
+                    continue
                 target_users.append(value.strip('<>@'))
         return target_users
 
@@ -131,6 +138,7 @@ def catch_message(**payload):
         return
     elif data.get('subtype') == 'bot_message':
         return
+    print(payload)
     message = Message(data)
     logging.debug(message)
     if message.banned:
@@ -157,6 +165,12 @@ def process_work(_message):
     logging.info("Processing command: {0}".format(_message.command))
     msg = ''
     command = COMMANDS.get(_message.command)
+    if _message.command == 'fake_points':
+        from fake_points import FakeInternetPoints
+        logging.info("fake_points event")
+        process_points = FakeInternetPoints(_message)
+        logging.debug(process_points)
+        return process_points.msg
     if command:
         logging.debug("Splitting up target users from: {0}".format(
             _message.target_users))
@@ -178,8 +192,8 @@ def main():
 
 if __name__ == '__main__':
     import sys
-    try:
-        main()
-    except KeyboardInterrupt:
-        logging.info("User interupt, stopping application")
-        sys.exit(1)
+    #try:
+    main()
+#    except KeyboardInterrupt:
+#        logging.info("User interupt, stopping application")
+#        sys.exit(1)

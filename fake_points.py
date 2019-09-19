@@ -29,11 +29,11 @@ class FakeInternetPoints(object):
         self.msg = self.check_valid_user(message)
 
     def check_valid_user(self, message):
-        if self.awarder in self.sunjects:
+        if self.awarder in self._subjects:
             _msg = "<@{0}> You are not allowed to assign yourself points."
             msg = _msg.format(self.awarder)
         else:
-            msg = self.set_user_points()
+            msg = self.set_user_points(message)
         return msg
 
     def process_command(self, message):
@@ -54,15 +54,27 @@ class FakeInternetPoints(object):
         import pickle
         msg = '' 
         points = {}
-        _scorefile = open('data/score', 'rb')
+        try:
+            _scorefile = open('data/score', 'rb')
+        except Exception:
+            _scorefile = open('data/score', 'wb')
+            pickle.dump(points, _scorefile)
+            _scorefile.close
+            _scorefile = open('data/score', 'rb')
         scoredict = pickle.load(_scorefile)
+        _scorefile.close()
         for user,value in scoredict.items():
             points[user] = int(value)
         for user in message.target_users:
-            points[user] += self.change
-            msg =+ "<@{0}> was given {1} points, \
-                    now they have {2} total".format(
-                            user,
+            if user in points:
+                points[user] += self.change
+            else:
+                points[user] = self.change
+            _msg = "<@{0}> has changed by {1} points, now they have {2} total"
+            msg += _msg.format(user,
                             self.change,
                             points[user])
+        _scorefile = open('data/score', 'wb')
+        pickle.dump(points, _scorefile)
+        _scorefile.close()
         return msg
