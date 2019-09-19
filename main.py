@@ -169,6 +169,8 @@ def process_work(_message):
         logging.debug(process_points)
         return process_points.msg
     command = COMMANDS.get(_message.command)
+    if _message.command == 'help':
+        return command
     if command:
         logging.debug("Splitting up target users from: {0}".format(
             _message.target_users))

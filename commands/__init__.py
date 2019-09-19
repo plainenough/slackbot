@@ -12,6 +12,7 @@ def discover_commands(logging):
     import importlib
     _mypath = os.path.abspath(__file__)
     MYWORKDIR = os.path.dirname(_mypath)
+    logging.debug(MYWORKDIR)
     _removal_list = ['__init__.py', '__pycache__', 'template.py']
     file_list = os.listdir(MYWORKDIR)
     logging.info("Remove files in the ban list - files to not import.")
@@ -24,7 +25,10 @@ def discover_commands(logging):
         _aliases = {}
         logging.debug("Checking file: {0}".format(item))
         if item.split('.')[1] == 'py':
-            _item = 'commands.{0}'.format(item.split('.')[0])
+            if __name__ == '__main__':
+                _item = '{0}'.format(item.split('.')[0])
+            else:
+                _item = 'commands.{0}'.format(item.split('.')[0])
             _newcommand = importlib.import_module(_item)
             try:
                 _aliases = _newcommand.alias()
@@ -35,8 +39,19 @@ def discover_commands(logging):
             logging.debug(_aliases)
             for alias, function in _aliases.items():
                 commands[alias] = function
+    commands['help'] = generate_help(commands)
     return commands
 
 
+def generate_help(commands):
+    """ Pulls the doc string out of all of the commands """
+    ret = '\n'.join(['{:<30}: {}'.format(name, func.__doc__.strip())
+                     for name, func in sorted(commands.items())])
+    return '```{}```'.format(ret)
+
+
 if __name__ == '__main__':
-    print(discover_commands())
+    import logging
+    import sys
+    logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
+    print(discover_commands(logging))
