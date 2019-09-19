@@ -44,12 +44,13 @@ def all_points(**kwargs: dict) -> str:
     except Exception:
         return msg
     if _scoredict == {}:
-        msg = 'No one on your team has gained or lost any fake internet points.'
+        msg = 'No one on your team has gained or lost any fake internet points'
     sorted_score = sorted(_scoredict, key=_scoredict.__getitem__)
     sorted_score.reverse()
     for user in sorted_score:
         msg += "<@{0}> has a score of {1}\n".format(user, _scoredict[user])
     return msg
+
 
 def reset_points(**kwargs: dict) -> str:
     """ Resets scoreboard for entire team; requires admin """
