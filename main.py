@@ -85,8 +85,7 @@ class Message(object):
         ''' Checks to see if the user is banned: returns boolean '''
         try:
             banned_users = []
-            with open('{0}/data/BANNED'.format(MYWORKDIR), 
-                    'r') as _banfile:
+            with open('{0}/data/BANNED'.format(MYWORKDIR), 'r') as _banfile:
                 for banneduser in _banfile.read().split('\n'):
                     banned_users.append(banneduser)
             if user in banned_users:
@@ -107,7 +106,7 @@ class Message(object):
                 command = value
             if value.startswith('-') or value.startswith('+'):
                 logging.info('Detected fake_points event')
-                command = { 'fake_points': value }
+                command = {'fake_points': value}
         return command
 
     def check_users(self, text):
@@ -192,8 +191,8 @@ def main():
 
 if __name__ == '__main__':
     import sys
-    #try:
-    main()
-#    except KeyboardInterrupt:
-#        logging.info("User interupt, stopping application")
-#        sys.exit(1)
+    try:
+        main()
+    except KeyboardInterrupt:
+        logging.info("User interupt, stopping application")
+        sys.exit(1)

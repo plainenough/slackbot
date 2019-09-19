@@ -53,7 +53,7 @@ class FakeInternetPoints(object):
 
     def set_user_points(self, message):
         import pickle
-        msg = '' 
+        msg = ''
         points = {}
         try:
             _scorefile = open('data/score', 'rb')
@@ -64,7 +64,7 @@ class FakeInternetPoints(object):
             _scorefile = open('data/score', 'rb')
         scoredict = pickle.load(_scorefile)
         _scorefile.close()
-        for user,value in scoredict.items():
+        for user, value in scoredict.items():
             points[user] = int(value)
         for user in message.target_users:
             if user in points:
@@ -73,8 +73,8 @@ class FakeInternetPoints(object):
                 points[user] = self.change
             _msg = "<@{0}> has changed by {1} points, now they have {2} total"
             msg += _msg.format(user,
-                            self.change,
-                            points[user])
+                               self.change,
+                               points[user])
         _scorefile = open('data/score', 'wb')
         pickle.dump(points, _scorefile)
         _scorefile.close()
