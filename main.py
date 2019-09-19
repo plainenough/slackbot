@@ -172,8 +172,6 @@ def process_work(_message):
     if command:
         logging.debug("Splitting up target users from: {0}".format(
             _message.target_users))
-        if _message.command == 'unbanall':
-            _message.target_users.append('unbanall')
         for _user in _message.target_users:
             kwargs = dict(user=_user,
                           message=_message,

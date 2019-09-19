@@ -72,11 +72,20 @@ class FakeInternetPoints(object):
         for user, value in scoredict.items():
             points[user] = int(value)
         for user in message.target_users:
+            _msg1 = "<@{0}> has changed by {1} " 
+            _msg2 = ", now they have {2} points in total.\n"
             if user in points:
                 points[user] += self.change
             else:
                 points[user] = self.change
-            _msg = "<@{0}> has changed by {1} points, now they have {2} total"
+            if self.change == 0:
+                return msg
+            elif self.change == 1:
+                _msg = "{0}point{1}".format(_msg1, _msg2)
+            elif self.change == -1:
+                _msg = "{0}point{1}".format(_msg1, _msg2)
+            else:
+                _msg = "{0}points{1}".format(_msg1, _msg2)
             msg += _msg.format(user,
                                self.change,
                                points[user])
