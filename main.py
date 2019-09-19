@@ -107,7 +107,7 @@ class Message(object):
                 command = value
             if value.startswith('-') or value.startswith('+'):
                 logging.info('Detected fake_points event')
-                command = "fake_points"
+                command = { 'fake_points': value }
         return command
 
     def check_users(self, text):
@@ -164,13 +164,13 @@ def catch_message(**payload):
 def process_work(_message):
     logging.info("Processing command: {0}".format(_message.command))
     msg = ''
-    command = COMMANDS.get(_message.command)
-    if _message.command == 'fake_points':
+    if 'fake_points' in _message.command:
         from fake_points import FakeInternetPoints
         logging.info("fake_points event")
         process_points = FakeInternetPoints(_message)
         logging.debug(process_points)
         return process_points.msg
+    command = COMMANDS.get(_message.command)
     if command:
         logging.debug("Splitting up target users from: {0}".format(
             _message.target_users))

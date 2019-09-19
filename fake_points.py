@@ -23,9 +23,10 @@ class FakeInternetPoints(object):
         """
 
     def __init__(self, message):
+        _command = message.command['fake_points']
         self._subjects = message.target_users
         self.awarder = message.user
-        self.change = self.process_command(message.command)
+        self.change = self.process_command(_command)
         self.msg = self.check_valid_user(message)
 
     def check_valid_user(self, message):
