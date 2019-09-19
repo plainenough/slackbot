@@ -7,6 +7,7 @@ class FakeInternetPoints(object):
 
         Atributes:
         awarder(str): The initator for change in FakeInternetPoints
+        change(int): The amount of information to be changed
         msg(str): The message posted by the bot
 
         Methods:
@@ -33,6 +34,7 @@ class FakeInternetPoints(object):
             msg = _msg.format(self.awarder)
         else:
             msg = self.set_user_points()
+        return msg
 
     def process_command(self, message):
         ''' Hardcoded to only allow a change of 5 or -5 '''
@@ -49,4 +51,18 @@ class FakeInternetPoints(object):
         return _change
 
     def set_user_points(self, message):
-
+        import pickle
+        msg = '' 
+        points = {}
+        _scorefile = open('data/score', 'rb')
+        scoredict = pickle.load(_scorefile)
+        for user,value in scoredict.items():
+            points[user] = int(value)
+        for user in message.target_users:
+            points[user] += self.change
+            msg =+ "<@{0}> was given {1} points, \
+                    now they have {2} total".format(
+                            user,
+                            self.change,
+                            points[user])
+        return msg
