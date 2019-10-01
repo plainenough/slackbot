@@ -1,0 +1,10 @@
+BANNED
+config.yaml
+*pyc
+*swp
+venv
+**__pycache__
+*log
+data
+.*cache*
+.coverage
