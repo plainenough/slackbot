@@ -4,7 +4,7 @@ def obtain_config(logging):
     import sys
     try:
         with open('data/config.yaml', 'r') as myconfig:
-            config = yaml.load(myconfig.read())
+            config = yaml.load(myconfig.read(), Loader=yaml.FullLoader)
     except FileNotFoundError:
         from utils.create_config import TEMPLATE, create_config
         logging.info('Creating fresh config - Update values.')

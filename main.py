@@ -128,9 +128,9 @@ class Message(object):
 def catch_message(**payload):
     web_client = payload['web_client']
     data = payload['data']
+    logging.debug(data)
     if data.get('bot_id') == BOTID:
         logging.info('No reply it is the bot')
-        logging.debug(data)
         return
     elif data.get('subtype') == 'message_changed':
         logging.info('Message was updated')
