@@ -3,8 +3,11 @@
 * Dynamically loads commands
 * Fake internet points system
 * Banning system
+* Testing suite
 
 ### TODO:
-* create testing
-* complete project
+* create commands
 * generate commands for examining fake internet points
+* generate some user instruction
+* build pipeline for jenkins
+* dockerfile creation
