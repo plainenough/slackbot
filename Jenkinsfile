@@ -7,6 +7,7 @@ pipeline {
     version = "1.0.0-$BUILD_NUMBER"
     buildName = String.format("derrickwalton/slackbot:%s", version)
     linuxBuild = ''
+    PYTHONPATH = "${WORKSPACE}"
   }
   stages {
     stage('Setup'){
