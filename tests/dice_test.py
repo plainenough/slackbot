@@ -13,9 +13,11 @@ def fixture_dice():
     myroll = dice.roll(**kwargs)
     return commands, myroll
 
+
 def test_alias(fixture_dice):
     commands, myroll = fixture_dice
     assert commands
+
 
 def test_roll(fixture_dice):
     commands, myroll = fixture_dice
