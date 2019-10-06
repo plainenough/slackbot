@@ -34,6 +34,9 @@ def fixture_message_not_admin():
     _mypath = os.path.abspath(__file__)
     MYWORKDIR = os.path.dirname(_mypath)
     from main import Message
+    #  Writing a banned user.
+    with open('data/BANNED', 'w') as _bannedfile:
+        _bannedfile.write('NOADMIN\n')
     #  Just a message I captured from my bot.
     ADMINS = [ ]
     COMMAND = ['ban']
@@ -79,3 +82,9 @@ def test_message_command(fixture_message):
 def test_user_not_admin(fixture_message_not_admin):
     message = fixture_message_not_admin
     assert message.admin == False
+
+
+def test_user_is_banned(fixture_message_not_admin):
+    message = fixture_message_not_admin
+    assert message.banned == True
+    
