@@ -157,5 +157,5 @@ def test_change_gtv(fixture_fip_gtv):
 
 
 def test_change_negative(fixture_fip_negative):
-     message, fip = fixture_fip_negative
-     assert fip.change == -1
+    message, fip = fixture_fip_negative
+    assert fip.change == -1
