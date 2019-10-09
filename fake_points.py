@@ -13,7 +13,7 @@ class FakeInternetPoints(object):
         Methods:
         check_valid_user: Verifies the user isn't giving themselves points
         process_command: Counts the qualifiers in a command
-        set_user_points:
+        set_user_points: Loads existing points and appends new values to dict
 
         Note:
         Fake internet points are really the main goal here.
@@ -57,6 +57,7 @@ class FakeInternetPoints(object):
         return _change
 
     def set_user_points(self, message):
+        """ Extracts dict from pickle rewrites on change. """
         import pickle
         msg = ''
         points = {}
@@ -73,7 +74,7 @@ class FakeInternetPoints(object):
             points[user] = int(value)
         for user in message.target_users:
             _msg1 = "<@{0}> has changed by {1} "
-            _msg2 = ", now they have {2} points in total.\n"
+            _msg2 = ", now they have {2} in total.\n"
             if user in points:
                 points[user] += self.change
             else:
