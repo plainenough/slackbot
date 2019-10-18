@@ -6,15 +6,14 @@ from commands import discover_commands
 from config import obtain_config
 
 
-_log = logging.basicConfig(level=logging.DEBUG,
-                           format='%(asctime)s %(name)-12s %(levelname)-8s' +
-                           ' %(message)s',
-                           datefmt='%m-%d %H:%M',
-                           filename='data/slackbot.log')
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s %(name)-12s %(levelname)-8s' +
+                    ' %(message)s',
+                    datefmt='%m-%d %H:%M',
+                    filename='data/slackbot.log')
 _mypath = os.path.abspath(__file__)
 config = obtain_config(logging)
-kwargs = dict(logging = _log,
-              myworkdir = os.path.dirname(_mypath),
+kwargs = dict(myworkdir = os.path.dirname(_mypath),
               commands = discover_commands(_log),
               slack_token = config.get('TOKEN'),
               botid = config.get('BOTID'),
