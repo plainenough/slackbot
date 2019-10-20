@@ -25,7 +25,7 @@ class Message(object):
         self._kwargs = kwargs
         self._list_commands = self._kwargs.get('commands')
         self._text = data.get('text')
-        self._user = data.get('user')
+        self.user = data.get('user')
         self.admin = self.check_admin()
         self.banned = self.check_banned()
         self.channel = data.get('channel')
@@ -37,7 +37,7 @@ class Message(object):
         value += "COMMAND:{2}\nORIGINAL_TEXT:{3}\n"
         value += "ADMIN:{4}\nBANNED:{5}\n"
         format_value = value.format(
-                self._user,
+                self.user,
                 self.target_users,
                 self.command,
                 self._text,
@@ -47,7 +47,7 @@ class Message(object):
 
     def check_admin(self):
         ''' Checks to see if the user is an admin: returns boolean '''
-        user = self._user
+        user = self.user
         if user in self._kwargs.get('admins'):
             return True
         else:
@@ -56,7 +56,7 @@ class Message(object):
     def check_banned(self):
         ''' Checks to see if the user is banned: returns boolean '''
         myworkdir = self._kwargs.get('myworkdir')
-        user = self._user
+        user = self.user
         try:
             banned_users = []
             with open('{0}/data/BANNED'.format(myworkdir), 'r') as _banfile:

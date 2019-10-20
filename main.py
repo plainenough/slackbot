@@ -4,7 +4,7 @@ import os
 from slack import RTMClient
 from commands import discover_commands
 from config import obtain_config
-
+from message import Message
 
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s %(name)-12s %(levelname)-8s' +
@@ -13,13 +13,13 @@ logging.basicConfig(level=logging.DEBUG,
                     filename='data/slackbot.log')
 _mypath = os.path.abspath(__file__)
 config = obtain_config(logging)
-kwargs = dict(myworkdir = os.path.dirname(_mypath),
-              commands = discover_commands(_log),
-              slack_token = config.get('TOKEN'),
-              botid = config.get('BOTID'),
-              botuserid = config.get('BOTUSERID'),
-              botname = config.get('BOTNAME'),
-              admins = config.get('ADMINS'))
+kwargs = dict(myworkdir=os.path.dirname(_mypath),
+              commands=discover_commands(logging),
+              slack_token=config.get('TOKEN'),
+              botid=config.get('BOTID'),
+              botuserid=config.get('BOTUSERID'),
+              botname=config.get('BOTNAME'),
+              admins=config.get('ADMINS'))
 
 
 @RTMClient.run_on(event="message")
@@ -38,7 +38,7 @@ def catch_message(**payload):
     elif data.get('subtype') == 'bot_message':
         return
     #  end section
-    message = Message(data)
+    message = Message(data, **kwargs)
     logging.debug(message)
     #  This portion might be able to be migrated into the message.Message class
     if message.banned:
@@ -55,11 +55,12 @@ def catch_message(**payload):
         return None
     else:
         web_client.chat_postMessage(
-                username=BOTNAME,
-                user=BOTUSERID,
+                username=config.get('BOTNAME'),
+                user=config.get('BOTUSERID'),
                 channel=message.channel,
                 text=msg)
     return
+
 
 #  This section might also be migrated in to the message.Message class
 def process_work(_message):
@@ -71,7 +72,7 @@ def process_work(_message):
         process_points = FakeInternetPoints(_message)
         logging.debug(process_points)
         return process_points.msg
-    command = COMMANDS.get(_message.command)
+    command = kwargs.get('commands').get(_message.command)
     if _message.command == 'help':
         return command
     if command:
@@ -80,11 +81,12 @@ def process_work(_message):
         for _user in _message.target_users:
             kwargs = dict(user=_user,
                           message=_message,
-                          workdir=MYWORKDIR)
+                          workdir=kwargs.get('myworkdir'))
             logging.debug(kwargs)
             msg += command(**kwargs)
     return msg
 #  end section
+
 
 def main():
     rtm_client = RTMClient(token=slack_token)

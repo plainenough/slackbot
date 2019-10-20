@@ -51,7 +51,7 @@ def fixture_message_not_admin():
 
 def test_message_user(fixture_message):
     message = fixture_message
-    assert message._user == 'UEMN5QPLM'
+    assert message.user == 'UEMN5QPLM'
 
 
 def test_message_channel(fixture_message):
