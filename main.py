@@ -25,7 +25,6 @@ kwargs = dict(myworkdir=os.path.dirname(_mypath),
 @RTMClient.run_on(event="message")
 def catch_message(**payload):
     data = payload['data']
-    logging = kwargs.get('logging')
     web_client = payload['web_client']
     logging.debug(data)
     #  This bit might be able to be moved into message.Message class
@@ -79,16 +78,17 @@ def process_work(_message):
         logging.debug("Splitting up target users from: {0}".format(
             _message.target_users))
         for _user in _message.target_users:
-            kwargs = dict(user=_user,
+            comargs = dict(user=_user,
                           message=_message,
                           workdir=kwargs.get('myworkdir'))
-            logging.debug(kwargs)
-            msg += command(**kwargs)
+            logging.debug(comargs)
+            msg += command(**comargs)
     return msg
 #  end section
 
 
 def main():
+    slack_token = config.get('TOKEN')
     rtm_client = RTMClient(token=slack_token)
     rtm_client.start()
 
