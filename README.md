@@ -1,4 +1,12 @@
 # Slackbot - A python slackbot integration
+## Versioning 
+major.minor.feature.patch-buildnumber
+* Major build numbers are always a breaking change, normally > 50% refactor.
+* Minor build numbers indicate a very likely breaking change (This is the custom version number I'm overloading because my code sucks.)
+* Feature build numbers are never breaking and will result from adding new commands, or subtle changes like logging.
+* Patch build numbers are reserved for trivial changes like bugs or wording inside help docs. 
+* Build numbers only represent the amount of times Jenkins as attempted builds on the pipeline. 
+
 ## Features:
 * Dynamically loads commands
 * Fake internet points system
@@ -12,9 +20,9 @@ also be done on initial launch.
 ### Requirements:
 * python 3.6 or higher
 * pip packages
-** pyyaml
-** slackclient
-** pytest
+  * pyyaml
+  * slackclient
+  * pytest
 * docker
 * app setup with api key in existing slack install
 
@@ -26,7 +34,7 @@ pytest -v
 ### Docker:
 ```
 docker build -t slackbot -f container/Dockerfile .
-docker run -v source=myvol1,target=/opt/slackbot/data --name=slackbot
+docker run -v /absolute/path/data:/opt/slackbot/data --name=slackbot
 ```
 
 ### Daemonized:

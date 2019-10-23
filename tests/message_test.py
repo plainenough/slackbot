@@ -1,19 +1,16 @@
 #!/usr/bin/env python3
 import pytest
 
-
 @pytest.fixture
 def fixture_message():
-    from main import Message
+    from message import Message
     import os
     _mypath = os.path.abspath(__file__)
-    MYWORKDIR = os.path.dirname(_mypath)
-    #  Writing a blank banned file for this fixture
-    with open('data/BANNED', 'w') as _bannedfile:
-        _bannedfile.write('')
+    myworkdir = os.path.dirname(_mypath)
+    kwargs = dict(myworkdir = '{0}'.format(myworkdir),
+                  commands = ['ban'],
+                  admins = ['UEMN5QPLM'])
     #  Just a message I captured from my bot.
-    ADMINS = ['UEMN5QPLM']
-    COMMAND = ['ban']
     _message = {'client_msg_id': 'just-a-message-id',
                 'suppress_notification': False,
                 'text': 'ban <@FRED>',
@@ -24,22 +21,20 @@ def fixture_message():
                 'channel': 'CETRYVBDW',
                 'event_ts': '1570120295.029800',
                 'ts': '1570120295.029800'}
-    message = Message(_message)
-    return message
+    msg = Message(_message, **kwargs)
+    return msg
 
 
 @pytest.fixture
 def fixture_message_not_admin():
+    from message import Message
     import os
     _mypath = os.path.abspath(__file__)
-    MYWORKDIR = os.path.dirname(_mypath)
-    from main import Message
-    #  Writing a banned user.
-    with open('data/BANNED', 'w') as _bannedfile:
-        _bannedfile.write('NOADMIN\n')
+    myworkdir = os.path.dirname(_mypath)
     #  Just a message I captured from my bot.
-    ADMINS = []
-    COMMAND = ['ban']
+    kwargs = dict(myworkdir = '{0}'.format(myworkdir),
+                  commands = ['ban'],
+                  admins = ['UEMN5QPLM'])
     _message = {'client_msg_id': 'just-a-message-id',
                 'suppress_notification': False,
                 'text': '<@FRED> ++ for good work homie',
@@ -50,8 +45,8 @@ def fixture_message_not_admin():
                 'channel': 'CETRYVBDW',
                 'event_ts': '1570120295.029800',
                 'ts': '1570120295.029800'}
-    message = Message(_message)
-    return message
+    msg = Message(_message, **kwargs)
+    return msg
 
 
 def test_message_user(fixture_message):

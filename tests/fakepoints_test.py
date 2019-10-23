@@ -5,15 +5,18 @@ import pytest
 @pytest.fixture
 def fixture_fip():
     from fake_points import FakeInternetPoints
-    from main import Message
+    from message import Message
+    import os
     import pickle
-    #  Writing a blank banned file for this fixture
-    with open('data/BANNED', 'w') as _bannedfile:
-        _bannedfile.write('')
     #  Writing an empty score file
     _score = {}
     with open('data/score', 'wb') as _scorefile:
         pickle.dump(_score, _scorefile)
+    _mypath = os.path.abspath(__file__)
+    myworkdir = os.path.dirname(_mypath)
+    kwargs = dict(myworkdir = myworkdir,
+                  commands = ['ban'],
+                  admins = ['UEMN5QPLM'])
     #  Just a message I captured from my bot.
     _message = {'client_msg_id': 'just-a-message-id',
                 'suppress_notification': False,
@@ -25,24 +28,27 @@ def fixture_fip():
                 'channel': 'CETRYVBDW',
                 'event_ts': '1570120295.029800',
                 'ts': '1570120295.029800'}
-    message = Message(_message)
-    fip_object = FakeInternetPoints(message)
-    return message, fip_object
+    msg = Message(_message, **kwargs)
+    fip_object = FakeInternetPoints(msg)
+    return msg, fip_object
 
 
 @pytest.fixture
 def fixture_fip_self():
     from fake_points import FakeInternetPoints
-    from main import Message
+    from message import Message
+    import os
     import pickle
-    #  Writing a blank banned file for this fixture
-    with open('data/BANNED', 'w') as _bannedfile:
-        _bannedfile.write('')
-    #  Writing an empty score file
     _score = {}
     with open('data/score', 'wb') as _scorefile:
         pickle.dump(_score, _scorefile)
     #  Just a message I captured from my bot.
+    _mypath = os.path.abspath(__file__)
+    myworkdir = os.path.dirname(_mypath)
+    kwargs = dict(myworkdir = myworkdir,
+                  commands = ['ban'],
+                  admins = ['UEMN5QPLM'])
+
     _message = {'client_msg_id': 'just-a-message-id',
                 'suppress_notification': False,
                 'text': '<@UEMN5QPLM> ++ for good work homie',
@@ -53,25 +59,26 @@ def fixture_fip_self():
                 'channel': 'CETRYVBDW',
                 'event_ts': '1570120295.029800',
                 'ts': '1570120295.029800'}
-    message = Message(_message)
-    fip_object = FakeInternetPoints(message)
-    return message, fip_object
+    msg = Message(_message, **kwargs)
+    fip_object = FakeInternetPoints(msg)
+    return msg, fip_object
 
 
 @pytest.fixture
 def fixture_fip_negative():
     #  Setup for checking on negative points.
     from fake_points import FakeInternetPoints
-    from main import Message
+    from message import Message
+    import os
     import pickle
-    #  Writing a blank banned file for this fixture
-    with open('data/BANNED', 'w') as _bannedfile:
-        _bannedfile.write('')
-    #  Writing an empty score file
     _score = {}
+    _mypath = os.path.abspath(__file__)
+    myworkdir = os.path.dirname(_mypath)
+    kwargs = dict(myworkdir = myworkdir,
+                  commands = ['ban'],
+                  admins = ['UEMN5QPLM'])
     with open('data/score', 'wb') as _scorefile:
         pickle.dump(_score, _scorefile)
-    #  Just a message I captured from my bot.
     _message = {'client_msg_id': 'just-a-message-id',
                 'suppress_notification': False,
                 'text': '<@FRED> -- for bad work homie',
@@ -82,21 +89,23 @@ def fixture_fip_negative():
                 'channel': 'CETRYVBDW',
                 'event_ts': '1570120295.029800',
                 'ts': '1570120295.029800'}
-    message = Message(_message)
-    fip_object = FakeInternetPoints(message)
-    return message, fip_object
+    msg = Message(_message, **kwargs)
+    fip_object = FakeInternetPoints(msg)
+    return msg, fip_object
 
 
 @pytest.fixture
 def fixture_fip_gtv():
     #  Setup for a point change > 5
     from fake_points import FakeInternetPoints
-    from main import Message
+    from message import Message
+    import os
     import pickle
-    #  Writing a blank banned file for this fixture
-    with open('data/BANNED', 'w') as _bannedfile:
-        _bannedfile.write('')
-    #  Writing an empty score file
+    _mypath = os.path.abspath(__file__)
+    myworkdir = os.path.dirname(_mypath)
+    kwargs = dict(myworkdir = myworkdir,
+                  commands = ['ban'],
+                  admins = ['UEMN5QPLM'])
     _score = {}
     with open('data/score', 'wb') as _scorefile:
         pickle.dump(_score, _scorefile)
@@ -111,9 +120,9 @@ def fixture_fip_gtv():
                 'channel': 'CETRYVBDW',
                 'event_ts': '1570120295.029800',
                 'ts': '1570120295.029800'}
-    message = Message(_message)
-    fip_object = FakeInternetPoints(message)
-    return message, fip_object
+    msg = Message(_message, **kwargs)
+    fip_object = FakeInternetPoints(msg)
+    return msg, fip_object
 
 
 def test_awarder(fixture_fip):
@@ -135,7 +144,7 @@ def test_message(fixture_fip):
     message, fip = fixture_fip
     msg = ''
     _msg1 = "<@{0}> has changed by {1} "
-    _msg2 = ", now they have {2} points in total.\n"
+    _msg2 = ", now they have {2} in total.\n"
     _msg = "{0}point{1}".format(_msg1, _msg2)
     for user in message.target_users:
         msg += _msg.format(user,
