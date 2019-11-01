@@ -18,6 +18,7 @@ class Message(object):
     check_message:
     check_user: Checks for users in text
     run_command:
+    run_fake_points:
 
     Note:
     This just creates a message object based on the returned payload from
@@ -36,8 +37,8 @@ class Message(object):
         self.admin = self.check_admin()
         self.banned = self.check_banned()
         self.channel = data.get('channel')
-        self.command = self.check_command()
         self.target_users = self.check_users()
+        self.check_command()
         self.run_command()
 
     def __str__(self):
@@ -86,10 +87,11 @@ class Message(object):
         ''' Grabs the first command from text: intentially only one '''
         for value in text.split(' '):
             if value in self._list_commands:
-                command = value
+                self.command = value
             if value.startswith('-') or value.startswith('+'):
-                command = {'fake_points': value}
-        return command
+                self.command = ''
+                self.msg = self.run_fake_points(self)
+        return
 
     def check_message(self):
         ''' Checks the message type againsts ignore list '''
@@ -123,5 +125,10 @@ class Message(object):
                 comargs = dict(user=_user,
                                message=self,
                                workdir=kwargs.get('myworkdir'))
-                self.msg += self.command(**comargs)
+                self.msg += self._list_commands.get(self.command)(**comargs)
         return
+
+    def run_fake_points(self):
+        ''' This method incorporates the FakeInternetPoints class '''
+        from fake_points import FakeInternetPoints
+        return FakeInternetPoints(self)
