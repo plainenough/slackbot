@@ -40,14 +40,7 @@ def catch_message(**payload):
     message = Message(data, **kwargs)
     logging.debug(message)
     #  This portion might be able to be migrated into the message.Message class
-    if message.banned:
-        if message.command:
-            msg = "<@{0}> you are banned, reach out to an admin".format(
-                   message.user)
-        else:
-            return None
-    else:
-        msg = process_work(message)
+    msg = process_work(message)
     #  end section
     if msg == '':
         logging.debug("Empty message: return None")
@@ -59,7 +52,6 @@ def catch_message(**payload):
                 channel=message.channel,
                 text=msg)
     return
-
 
 #  This section might also be migrated in to the message.Message class
 def process_work(_message):
