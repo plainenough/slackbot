@@ -75,7 +75,8 @@ class Message(object):
                 self.msg += "Please contact an admin."
                 self.msg = self.msg.format(self.user)
                 return True
-        return False
+        except:
+            return False
 
     def check_bot(self):
         ''' Checks if the message was sent from the bot user '''
@@ -85,12 +86,12 @@ class Message(object):
 
     def check_command(self):
         ''' Grabs the first command from text: intentially only one '''
-        for value in text.split(' '):
+        for value in self._text.split(' '):
             if value in self._list_commands:
                 self.command = value
             if value.startswith('-') or value.startswith('+'):
                 self.command = ''
-                self.msg = self.run_fake_points(self)
+                self.msg = self.run_fake_points(value)
         return
 
     def check_message(self):
@@ -128,7 +129,8 @@ class Message(object):
                 self.msg += self._list_commands.get(self.command)(**comargs)
         return
 
-    def run_fake_points(self):
+    def run_fake_points(self, value):
         ''' This method incorporates the FakeInternetPoints class '''
         from fake_points import FakeInternetPoints
+        self._fipchange = value
         return FakeInternetPoints(self)

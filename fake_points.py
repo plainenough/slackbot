@@ -4,7 +4,6 @@
 class FakeInternetPoints(object):
     """ A tracking system for fake internet points awarded
         by users for users.
-
         Atributes:
         awarder(str): The initator for change in FakeInternetPoints
         change(int): The amount of information to be changed
@@ -23,7 +22,7 @@ class FakeInternetPoints(object):
         """
 
     def __init__(self, message):
-        _command = message.command['fake_points']
+        _command = message._fipchange
         self._subjects = message.target_users
         self.awarder = message.user
         self.change = self.process_command(_command)
