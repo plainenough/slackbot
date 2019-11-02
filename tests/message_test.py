@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 import pytest
 
+
 @pytest.fixture
 def fixture_message():
     from message import Message
     import os
     _mypath = os.path.abspath(__file__)
     myworkdir = os.path.dirname(_mypath)
-    kwargs = dict(myworkdir = '{0}'.format(myworkdir),
-                  commands = ['ban'],
-                  admins = ['UEMN5QPLM'])
+    kwargs = dict(myworkdir='{0}'.format(myworkdir),
+                  commands=['ban'],
+                  admins=['UEMN5QPLM'])
     #  Just a message I captured from my bot.
     _message = {'client_msg_id': 'just-a-message-id',
                 'suppress_notification': False,
@@ -32,9 +33,9 @@ def fixture_message_not_admin():
     _mypath = os.path.abspath(__file__)
     myworkdir = os.path.dirname(_mypath)
     #  Just a message I captured from my bot.
-    kwargs = dict(myworkdir = '{0}'.format(myworkdir),
-                  commands = ['ban'],
-                  admins = ['UEMN5QPLM'])
+    kwargs = dict(myworkdir='{0}'.format(myworkdir),
+                  commands=['ban'],
+                  admins=['UEMN5QPLM'])
     _message = {'client_msg_id': 'just-a-message-id',
                 'suppress_notification': False,
                 'text': '<@FRED> ++ for good work homie',
@@ -45,6 +46,26 @@ def fixture_message_not_admin():
                 'channel': 'CETRYVBDW',
                 'event_ts': '1570120295.029800',
                 'ts': '1570120295.029800'}
+    msg = Message(_message, **kwargs)
+    return msg
+
+
+@pytest.fixture
+def fixture_deleted_message():
+    from message import Message
+    import os
+    _mypath = os.path.abspath(__file__)
+    myworkdir = os.path.dirname(_mypath)
+    #  Just a message I captured from my bot.
+    kwargs = dict(myworkdir='{0}'.format(myworkdir),
+                  commands=['ban'],
+                  admins=['UEMN5QPLM'])
+    _message = {'subtype': 'message_deleted',
+                'hidden': True, 'deleted_ts': '1572708401.008200',
+                'channel': 'CETRYVBDW',
+                'previous_message':
+                {'client_msg_id': '00ee0609-0b8b-4e14-b77d-36fcf0648182'},
+                'event_ts': '1572708432.008400', 'ts': '1572708432.008400'}
     msg = Message(_message, **kwargs)
     return msg
 
@@ -82,3 +103,8 @@ def test_user_not_admin(fixture_message_not_admin):
 def test_user_is_banned(fixture_message_not_admin):
     message = fixture_message_not_admin
     assert message.banned is True
+
+
+def test_message_delete(fixture_deleted_message):
+    message = fixture_deleted_message
+    assert message.msg == ''

@@ -86,9 +86,12 @@ class Message(object):
 
     def check_command(self):
         ''' Grabs the first command from text: intentially only one '''
+        if not self._text:
+            return
         for value in self._text.split(' '):
             if value in self._list_commands:
                 self.command = value
+                return
             if value.startswith('-') or value.startswith('+'):
                 self.command = ''
                 self.msg = self.run_fake_points(value)
@@ -107,9 +110,10 @@ class Message(object):
         ''' Grabs all of the user ids from the text: returns list '''
         import re
         target_users = []
-        text = self._text
+        if not self._text:
+            return target_users
         reg = re.compile('<@.*>')
-        for value in text.split(' '):
+        for value in self._text.split(' '):
             if reg.match(value):
                 if value in target_users:
                     #  This little gem is to prevent multiple entries for
@@ -125,7 +129,7 @@ class Message(object):
             for _user in self.target_users:
                 comargs = dict(user=_user,
                                message=self,
-                               workdir=kwargs.get('myworkdir'))
+                               workdir=self._kwargs.get('myworkdir'))
                 self.msg += self._list_commands.get(self.command)(**comargs)
         return
 
