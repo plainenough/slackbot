@@ -8,17 +8,17 @@ class Message(object):
     commands(str): First command from text, Defaults to empty value
     msg(str): The formatted message to return to the client
     user(str): This is the user who sent the message
-    target_users(str): Obtain user ids fortarge users from text
+    target_users(list): Obtain user ids for target users from text
 
     Methods:
     check_admin: Checks if user is an admin
     check_banned: Checks if the user is banned
-    check_bot:
+    check_bot: Checks to see if the bot user sent the message
     check_command: Checks for first command in text
-    check_message:
+    check_message: Check for blackisted message types
     check_user: Checks for users in text
-    run_command:
-    run_fake_points:
+    run_command: Executes the command based on text input
+    run_fake_points: Executes fakepoint class
 
     Note:
     This just creates a message object based on the returned payload from
@@ -70,18 +70,23 @@ class Message(object):
             with open('{0}/data/BANNED'.format(myworkdir), 'r') as _banfile:
                 for banneduser in _banfile.read().split('\n'):
                     banned_users.append(banneduser)
-            if user in banned_users:
-                self.msg = "@<{0}> you are banned. "
-                self.msg += "Please contact an admin."
-                self.msg = self.msg.format(self.user)
+            if self.user in banned_users:
+                _msg = "@<{0}> you are banned. "
+                _msg += "Please contact an admin."
+                self.msg = _msg.format(self.user)
+                self.command = False
                 return True
-        except:
+        except Exception as error:
             return False
+        return False
 
     def check_bot(self):
         ''' Checks if the message was sent from the bot user '''
-        if self._data.get('bot_id') == self._kwargs.get('botid'):
-            self.command = ''
+        if self._data.get('bot_id'):
+            if self._data.get('bot_id') == self._kwargs.get('botid'):
+                self.command = False
+        elif self.user == self._kwargs.get('botid'):
+            self.command = False
         return
 
     def check_command(self):
@@ -89,12 +94,14 @@ class Message(object):
         if not self._text:
             return
         for value in self._text.split(' '):
-            if value in self._list_commands:
-                self.command = value
+            if str(value) in self._list_commands:
+                self.command = self._list_commands.get(value)
                 return
             if value.startswith('-') or value.startswith('+'):
-                self.command = ''
+                self.command = False
                 self.msg = self.run_fake_points(value)
+                return
+        self.command = False
         return
 
     def check_message(self):
@@ -103,7 +110,7 @@ class Message(object):
                         'bot_message',
                         'message_deleted']
         if self._data.get('subtype') in ignore_types:
-            self.command = ''
+            self.command = False
         return
 
     def check_users(self):
@@ -130,7 +137,7 @@ class Message(object):
                 comargs = dict(user=_user,
                                message=self,
                                workdir=self._kwargs.get('myworkdir'))
-                self.msg += self._list_commands.get(self.command)(**comargs)
+                self.msg += self.command(**comargs)
         return
 
     def run_fake_points(self, value):
