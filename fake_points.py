@@ -11,6 +11,7 @@ class FakeInternetPoints(object):
 
         Methods:
         check_valid_user: Verifies the user isn't giving themselves points
+        load_score_file: Loads scorefile from disc
         process_command: Counts the qualifiers in a command
         set_user_points: Loads existing points and appends new values to dict
 
@@ -22,10 +23,11 @@ class FakeInternetPoints(object):
         """
 
     def __init__(self, message):
-        _command = message._fipchange
+        self._kwargs = message._kwargs
+        self._command = message._fipchange
         self._subjects = message.target_users
         self.awarder = message.user
-        self.change = self.process_command(_command)
+        self.change = self.process_command(self._command)
         self.msg = self.check_valid_user(message)
 
     def check_valid_user(self, message):
@@ -35,6 +37,22 @@ class FakeInternetPoints(object):
         else:
             msg = self.set_user_points(message)
         return msg
+
+    def load_score_file(self):
+        ''' Handles Loading the score file '''
+        import pickle
+        myworkdir = self._kwargs.get('myworkdir')
+        try:
+            _scorefile = open('{0}/data/score'.format(myworkdir), 'rb')
+        except Exception as error:
+            points = {}
+            _scorefile = open('{0}/data/score'.format(myworkdir), 'wb')
+            pickle.dump(points, _scorefile)
+            _scorefile.close
+            _scorefile = open('{0}/data/score'.format(myworkdir), 'rb')
+        scoredict = pickle.load(_scorefile)
+        _scorefile.close()
+        return scoredict
 
     def process_command(self, message):
         ''' Hardcoded to only allow a change of 5 or -5 '''
@@ -60,15 +78,7 @@ class FakeInternetPoints(object):
         import pickle
         msg = ''
         points = {}
-        try:
-            _scorefile = open('data/score', 'rb')
-        except Exception:
-            _scorefile = open('data/score', 'wb')
-            pickle.dump(points, _scorefile)
-            _scorefile.close
-            _scorefile = open('data/score', 'rb')
-        scoredict = pickle.load(_scorefile)
-        _scorefile.close()
+        scoredict = self.load_score_file()
         for user, value in scoredict.items():
             points[user] = int(value)
         for user in message.target_users:
@@ -80,16 +90,15 @@ class FakeInternetPoints(object):
                 points[user] = self.change
             if self.change == 0:
                 return msg
-            elif self.change == 1:
-                _msg = "{0}point{1}".format(_msg1, _msg2)
-            elif self.change == -1:
+            elif self.change in [1, -1]:
                 _msg = "{0}point{1}".format(_msg1, _msg2)
             else:
                 _msg = "{0}points{1}".format(_msg1, _msg2)
             msg += _msg.format(user,
                                self.change,
                                points[user])
-        _scorefile = open('data/score', 'wb')
+        myworkdir = self._kwargs.get('myworkdir')
+        _scorefile = open('{0}/data/score'.format(myworkdir), 'wb')
         pickle.dump(points, _scorefile)
         _scorefile.close()
         return msg

@@ -4,16 +4,15 @@ import pytest
 
 @pytest.fixture
 def fixture_fip():
-    from fake_points import FakeInternetPoints
     from message import Message
     import os
     import pickle
     #  Writing an empty score file
     _score = {}
-    with open('data/score', 'wb') as _scorefile:
-        pickle.dump(_score, _scorefile)
     _mypath = os.path.abspath(__file__)
     myworkdir = os.path.dirname(_mypath)
+    with open('{0}/data/score'.format(myworkdir), 'wb') as _scorefile:
+        pickle.dump(_score, _scorefile)
     kwargs = dict(myworkdir = myworkdir,
                   commands = ['ban'],
                   admins = ['UEMN5QPLM'])
@@ -29,22 +28,20 @@ def fixture_fip():
                 'event_ts': '1570120295.029800',
                 'ts': '1570120295.029800'}
     msg = Message(_message, **kwargs)
-    fip_object = FakeInternetPoints(msg)
-    return msg, fip_object
+    return msg
 
 
 @pytest.fixture
 def fixture_fip_self():
-    from fake_points import FakeInternetPoints
     from message import Message
     import os
     import pickle
     _score = {}
-    with open('data/score', 'wb') as _scorefile:
-        pickle.dump(_score, _scorefile)
     #  Just a message I captured from my bot.
     _mypath = os.path.abspath(__file__)
     myworkdir = os.path.dirname(_mypath)
+    with open('{0}/data/score'.format(myworkdir), 'wb') as _scorefile:
+        pickle.dump(_score, _scorefile)
     kwargs = dict(myworkdir = myworkdir,
                   commands = ['ban'],
                   admins = ['UEMN5QPLM'])
@@ -60,14 +57,12 @@ def fixture_fip_self():
                 'event_ts': '1570120295.029800',
                 'ts': '1570120295.029800'}
     msg = Message(_message, **kwargs)
-    fip_object = FakeInternetPoints(msg)
-    return msg, fip_object
+    return msg
 
 
 @pytest.fixture
 def fixture_fip_negative():
     #  Setup for checking on negative points.
-    from fake_points import FakeInternetPoints
     from message import Message
     import os
     import pickle
@@ -90,14 +85,12 @@ def fixture_fip_negative():
                 'event_ts': '1570120295.029800',
                 'ts': '1570120295.029800'}
     msg = Message(_message, **kwargs)
-    fip_object = FakeInternetPoints(msg)
-    return msg, fip_object
+    return msg
 
 
 @pytest.fixture
 def fixture_fip_gtv():
     #  Setup for a point change > 5
-    from fake_points import FakeInternetPoints
     from message import Message
     import os
     import pickle
@@ -121,50 +114,49 @@ def fixture_fip_gtv():
                 'event_ts': '1570120295.029800',
                 'ts': '1570120295.029800'}
     msg = Message(_message, **kwargs)
-    fip_object = FakeInternetPoints(msg)
-    return msg, fip_object
+    return msg
 
 
 def test_awarder(fixture_fip):
-    message, fip = fixture_fip
-    assert fip.awarder == 'UEMN5QPLM'
+    message = fixture_fip
+    assert message.fip.awarder == 'UEMN5QPLM'
 
 
 def test_targets(fixture_fip):
-    message, fip = fixture_fip
+    message = fixture_fip
     assert message.target_users == ['FRED']
 
 
 def test_change(fixture_fip):
-    message, fip = fixture_fip
-    assert fip.change == 1
+    message = fixture_fip
+    assert message.fip.change == 1
 
 
 def test_message(fixture_fip):
-    message, fip = fixture_fip
+    message = fixture_fip
     msg = ''
     _msg1 = "<@{0}> has changed by {1} "
     _msg2 = ", now they have {2} in total.\n"
     _msg = "{0}point{1}".format(_msg1, _msg2)
     for user in message.target_users:
         msg += _msg.format(user,
-                           fip.change,
+                           message.fip.change,
                            1)
-    assert fip.msg == msg
+    assert message.msg == msg
 
 
 def test_awarder_self(fixture_fip_self):
-    message, fip = fixture_fip_self
+    message = fixture_fip_self
     _msg = "<@{0}> You are not allowed to assign yourself points."
-    msg = _msg.format(fip.awarder)
-    assert fip.msg == msg
+    msg = _msg.format(message.fip.awarder)
+    assert message.msg == msg
 
 
 def test_change_gtv(fixture_fip_gtv):
-    message, fip = fixture_fip_gtv
-    assert fip.change == 5
+    message = fixture_fip_gtv
+    assert message.fip.change == 5
 
 
 def test_change_negative(fixture_fip_negative):
-    message, fip = fixture_fip_negative
-    assert fip.change == -1
+    message = fixture_fip_negative
+    assert message.fip.change == -1

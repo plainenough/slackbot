@@ -144,4 +144,5 @@ class Message(object):
         ''' This method incorporates the FakeInternetPoints class '''
         from fake_points import FakeInternetPoints
         self._fipchange = value
-        return FakeInternetPoints(self)
+        self.fip = FakeInternetPoints(self)
+        return self.fip.msg
