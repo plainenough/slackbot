@@ -122,9 +122,11 @@ class Message(object):
         reg = re.compile('<@.*>')
         for value in self._text.split(' '):
             if reg.match(value):
-                if value in target_users:
+                if value.strip('<>@') in target_users:
                     #  This little gem is to prevent multiple entries for
                     #  a user in the list inspired by Dylan
+                    continue
+                elif value.strip('<>@') == self._kwargs.get('botid'):
                     continue
                 target_users.append(value.strip('<>@'))
         return target_users
