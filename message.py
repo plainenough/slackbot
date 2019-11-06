@@ -135,11 +135,22 @@ class Message(object):
         self.check_bot()
         self.check_message()
         if self.command:
-            for _user in self.target_users:
-                comargs = dict(user=_user,
-                               message=self,
-                               workdir=self._kwargs.get('myworkdir'))
-                self.msg += self.command(**comargs)
+           if len(self.target_users) > 1:
+               self.run_multiuser_command()
+               return
+           else:
+               comargs = dict(user=self.user,
+                              message=self,
+                              workdir=self._kwargs.get('myworkdir'))
+               self.msg = self.command(**comargs)
+           return
+
+    def run_multiuser_command(self):
+        for _user in self.target_users:
+            comargs = dict(user=_user,
+                           message=self,
+                           workdir=self._kwargs.get('myworkdir'))
+            self.msg += self.command(**comargs)
         return
 
     def run_fake_points(self, value):
