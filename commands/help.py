@@ -14,7 +14,10 @@ def alias():
 
 def generate_help(**kwargs):
     """ Pulls the doc string out of all of the commands """
-    commands = kwargs.get('message')._list_commands
+    message = kwargs.get('message')
+    commands = message._list_commands
+    # This directs the message to the user.
+    message.channel = message.user
     ret = '\n'.join(['{:<30}: {}'.format(name, func.__doc__.strip())
                      for name, func in sorted(commands.items())])
     return '```{}```'.format(ret)
