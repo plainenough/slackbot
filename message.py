@@ -36,7 +36,6 @@ class Message(object):
         self.msg = ''
         self.admin = self.check_admin()
         self.banned = self.check_banned()
-        self.channel = data.get('channel')
         self.target_users = self.check_users()
         self.check_command()
         self.run_command()
@@ -65,6 +64,7 @@ class Message(object):
     def check_banned(self):
         ''' Checks to see if the user is banned: returns boolean '''
         myworkdir = self._kwargs.get('myworkdir')
+        self.channel = self._data.get('channel')
         try:
             banned_users = []
             with open('{0}/data/BANNED'.format(myworkdir), 'r') as _banfile:
@@ -75,6 +75,7 @@ class Message(object):
                 _msg += "Please contact an admin."
                 self.msg = _msg.format(self.user)
                 self.command = False
+                self.channel = self.user
                 return True
         except Exception as error:
             return False
