@@ -13,8 +13,8 @@ def alias():
 
 
 def generate_help(**kwargs):
-    commands = kwargs.message._list_commands
     """ Pulls the doc string out of all of the commands """
+    commands = kwargs.message._list_commands
     ret = '\n'.join(['{:<30}: {}'.format(name, func.__doc__.strip())
                      for name, func in sorted(commands.items())])
     return '```{}```'.format(ret)
