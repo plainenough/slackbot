@@ -39,15 +39,7 @@ def discover_commands(logging):
             logging.debug(_aliases)
             for alias, function in _aliases.items():
                 commands[alias] = function
-    commands['help'] = generate_help(commands)
     return commands
-
-
-def generate_help(commands):
-    """ Pulls the doc string out of all of the commands """
-    ret = '\n'.join(['{:<30}: {}'.format(name, func.__doc__.strip())
-                     for name, func in sorted(commands.items())])
-    return '```{}```'.format(ret)
 
 
 if __name__ == '__main__':
