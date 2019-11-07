@@ -9,12 +9,10 @@ def alias():
 def roll(**kwargs: dict) -> str:
     """rolls a dice: roll d20 """
     import random
-    user = kwargs.get('user')
-    channel = kwargs.get('channel')
-    msg_text = kwargs.get('text')
+    message = kwargs.get('message')
     _commands = []
     msg = ''
-    for com in msg_text.split():
+    for com in message._text.split():
         if com == 'roll' or '':
             continue
         _commands.append(com)
