@@ -144,11 +144,11 @@ class Message(object):
                     user = self.target_users[0]
                 else:
                     user = 'none'
-               comargs = dict(user=user,
-                              message=self,
-                              workdir=self._kwargs.get('myworkdir'))
-               self.msg = self.command(**comargs)
-           return
+                comargs = dict(user=user,
+                               message=self,
+                               workdir=self._kwargs.get('myworkdir'))
+                self.msg = self.command(**comargs)
+            return
 
     def run_multiuser_command(self):
         for _user in self.target_users:
