@@ -136,11 +136,15 @@ class Message(object):
         self.check_bot()
         self.check_message()
         if self.command:
-           if len(self.target_users) > 1:
-               self.run_multiuser_command()
-               return
-           else:
-               comargs = dict(user=self.user,
+            if len(self.target_users) > 1:
+                self.run_multiuser_command()
+                return
+            else:
+                if self.target_users == 1:
+                    user = self.target_users[0]
+                else:
+                    user = 'none'
+               comargs = dict(user=user,
                               message=self,
                               workdir=self._kwargs.get('myworkdir'))
                self.msg = self.command(**comargs)
