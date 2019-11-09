@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import pytest
 
+
 class Message(object):
     ''' Test class for command test '''
 

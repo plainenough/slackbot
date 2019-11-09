@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 import pytest
 
+
 def ban(**kwargs):
     return 'True'
+
 
 @pytest.fixture
 def fixture_message():

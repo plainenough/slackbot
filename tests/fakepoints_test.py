@@ -13,9 +13,9 @@ def fixture_fip():
     myworkdir = os.path.dirname(_mypath)
     with open('{0}/data/score'.format(myworkdir), 'wb') as _scorefile:
         pickle.dump(_score, _scorefile)
-    kwargs = dict(myworkdir = myworkdir,
-                  commands = ['ban'],
-                  admins = ['UEMN5QPLM'])
+    kwargs = dict(myworkdir=myworkdir,
+                  commands=['ban'],
+                  admins=['UEMN5QPLM'])
     #  Just a message I captured from my bot.
     _message = {'client_msg_id': 'just-a-message-id',
                 'suppress_notification': False,
@@ -42,9 +42,9 @@ def fixture_fip_self():
     myworkdir = os.path.dirname(_mypath)
     with open('{0}/data/score'.format(myworkdir), 'wb') as _scorefile:
         pickle.dump(_score, _scorefile)
-    kwargs = dict(myworkdir = myworkdir,
-                  commands = ['ban'],
-                  admins = ['UEMN5QPLM'])
+    kwargs = dict(myworkdir=myworkdir,
+                  commands=['ban'],
+                  admins=['UEMN5QPLM'])
 
     _message = {'client_msg_id': 'just-a-message-id',
                 'suppress_notification': False,
@@ -69,9 +69,9 @@ def fixture_fip_negative():
     _score = {}
     _mypath = os.path.abspath(__file__)
     myworkdir = os.path.dirname(_mypath)
-    kwargs = dict(myworkdir = myworkdir,
-                  commands = ['ban'],
-                  admins = ['UEMN5QPLM'])
+    kwargs = dict(myworkdir=myworkdir,
+                  commands=['ban'],
+                  admins=['UEMN5QPLM'])
     with open('data/score', 'wb') as _scorefile:
         pickle.dump(_score, _scorefile)
     _message = {'client_msg_id': 'just-a-message-id',
@@ -96,9 +96,9 @@ def fixture_fip_gtv():
     import pickle
     _mypath = os.path.abspath(__file__)
     myworkdir = os.path.dirname(_mypath)
-    kwargs = dict(myworkdir = myworkdir,
-                  commands = ['ban'],
-                  admins = ['UEMN5QPLM'])
+    kwargs = dict(myworkdir=myworkdir,
+                  commands=['ban'],
+                  admins=['UEMN5QPLM'])
     _score = {}
     with open('data/score', 'wb') as _scorefile:
         pickle.dump(_score, _scorefile)

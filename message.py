@@ -77,7 +77,7 @@ class Message(object):
                 self.msg = _msg
                 self.channel = self.user
                 self.banned = True
-                return 
+                return
         except Exception as error:
             return
         return
@@ -142,7 +142,7 @@ class Message(object):
                 return
             else:
                 self.check_banned()
-                if self.banned == True:
+                if self.banned is True:
                     self.command = None
                     return
                 if len(self.target_users) == 1:
@@ -157,7 +157,7 @@ class Message(object):
 
     def run_multiuser_command(self):
         self.check_banned()
-        if self.banned == True:
+        if self.banned is True:
             self.command = None
             return
         for _user in self.target_users:
@@ -171,7 +171,7 @@ class Message(object):
         ''' This method incorporates the FakeInternetPoints class '''
         from fake_points import FakeInternetPoints
         self.check_banned()
-        if self.banned == True:
+        if self.banned is True:
             return self.msg
         self._fipchange = value
         self.fip = FakeInternetPoints(self)
