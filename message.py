@@ -35,7 +35,7 @@ class Message(object):
         self.user = data.get('user')
         self.msg = ''
         self.admin = self.check_admin()
-        self.banned = self.check_banned()
+        self.banned = False
         self.target_users = self.check_users()
         self.check_command()
         self.run_command()
@@ -74,12 +74,12 @@ class Message(object):
                 _msg = "@<{0}> you are banned. "
                 _msg += "Please contact an admin."
                 self.msg = _msg.format(self.user)
-                self.command = False
                 self.channel = self.user
-                return True
+                self.banned = True
+                return 
         except Exception as error:
-            return False
-        return False
+            return
+        return
 
     def check_bot(self):
         ''' Checks if the message was sent from the bot user '''
@@ -140,6 +140,10 @@ class Message(object):
                 self.run_multiuser_command()
                 return
             else:
+                self.check_banned()
+                if self.banned = True:
+                    self.command = None
+                    return
                 if self.target_users == 1:
                     user = self.target_users[0]
                 else:
@@ -151,6 +155,10 @@ class Message(object):
             return
 
     def run_multiuser_command(self):
+        self.check_banned()
+        if self.banned = True:
+            self.command = None
+            return
         for _user in self.target_users:
             comargs = dict(user=_user,
                            message=self,
