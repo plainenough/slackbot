@@ -6,13 +6,19 @@ class Message(object):
     banned(bool): User ban status
     channel(str): A channel ID from slack
     commands(str): First command from text, Defaults to empty value
-    target_users(str): Obtain user ids fortarge users from text
+    msg(str): The formatted message to return to the client
+    user(str): This is the user who sent the message
+    target_users(list): Obtain user ids for target users from text
 
     Methods:
     check_admin: Checks if user is an admin
     check_banned: Checks if the user is banned
+    check_bot: Checks to see if the bot user sent the message
     check_command: Checks for first command in text
+    check_message: Check for blackisted message types
     check_user: Checks for users in text
+    run_command: Executes the command based on text input
+    run_fake_points: Executes fakepoint class
 
     Note:
     This just creates a message object based on the returned payload from
@@ -22,33 +28,36 @@ class Message(object):
     """
 
     def __init__(self, data, **kwargs):
+        self._data = data
         self._kwargs = kwargs
         self._list_commands = self._kwargs.get('commands')
         self._text = data.get('text')
         self.user = data.get('user')
+        self.msg = ''
         self.admin = self.check_admin()
-        self.banned = self.check_banned()
+        self.banned = False
         self.channel = data.get('channel')
-        self.command = self.check_command()
         self.target_users = self.check_users()
+        self.check_command()
+        self.run_command()
 
     def __str__(self):
         value = "\nUSER:{0}\nTARGETS:{1}\n"
         value += "COMMAND:{2}\nORIGINAL_TEXT:{3}\n"
-        value += "ADMIN:{4}\nBANNED:{5}\n"
+        value += "MSG:{4}\nADMIN:{5}\nBANNED:{6}"
         format_value = value.format(
                 self.user,
                 self.target_users,
                 self.command,
                 self._text,
+                self.msg,
                 self.admin,
                 self.banned)
         return format_value
 
     def check_admin(self):
         ''' Checks to see if the user is an admin: returns boolean '''
-        user = self.user
-        if user in self._kwargs.get('admins'):
+        if self.user in self._kwargs.get('admins'):
             return True
         else:
             return False
@@ -56,45 +65,114 @@ class Message(object):
     def check_banned(self):
         ''' Checks to see if the user is banned: returns boolean '''
         myworkdir = self._kwargs.get('myworkdir')
-        user = self.user
+        self.channel = self._data.get('channel')
         try:
             banned_users = []
             with open('{0}/data/BANNED'.format(myworkdir), 'r') as _banfile:
                 for banneduser in _banfile.read().split('\n'):
                     banned_users.append(banneduser)
-            if user in banned_users:
-                return True
-        except Exception as e:
-            print("message.py:68")
-            exit(1)
-        return False
+            if self.user in banned_users:
+                _msg = "You are banned. "
+                _msg += "Please contact an admin."
+                self.msg = _msg
+                self.channel = self.user
+                self.banned = True
+                return
+        except Exception as error:
+            return
+        return
+
+    def check_bot(self):
+        ''' Checks if the message was sent from the bot user '''
+        if self._data.get('bot_id'):
+            if self._data.get('bot_id') == self._kwargs.get('botid'):
+                self.command = False
+        elif self.user == self._kwargs.get('botid'):
+            self.command = False
+        return
 
     def check_command(self):
         ''' Grabs the first command from text: intentially only one '''
-        command = ''
-        myworkdir = self._kwargs.get('myworkdir')
-        commands = self._list_commands
-        text = self._text
-        if text == '':
-            return command
-        for value in text.split(' '):
-            if value in commands:
-                command = value
+        if not self._text:
+            return
+        for value in self._text.split(' '):
+            if str(value) in self._list_commands:
+                self.command = self._list_commands.get(value)
+                return
             if value.startswith('-') or value.startswith('+'):
-                command = {'fake_points': value}
-        return command
+                self.command = False
+                self.msg = self.run_fake_points(value)
+                return
+        self.command = False
+        return
+
+    def check_message(self):
+        ''' Checks the message type againsts ignore list '''
+        ignore_types = ['message_changed',
+                        'bot_message',
+                        'message_deleted']
+        if self._data.get('subtype') in ignore_types:
+            self.command = False
+        return
 
     def check_users(self):
         ''' Grabs all of the user ids from the text: returns list '''
         import re
         target_users = []
-        text = self._text
+        if not self._text:
+            return target_users
         reg = re.compile('<@.*>')
-        for value in text.split(' '):
+        for value in self._text.split(' '):
             if reg.match(value):
-                if value in target_users:
+                if value.strip('<>@') in target_users:
                     #  This little gem is to prevent multiple entries for
                     #  a user in the list inspired by Dylan
                     continue
+                elif value.strip('<>@') == self._kwargs.get('botid'):
+                    continue
                 target_users.append(value.strip('<>@'))
         return target_users
+
+    def run_command(self):
+        self.check_bot()
+        self.check_message()
+        if self.command:
+            if len(self.target_users) > 1:
+                self.run_multiuser_command()
+                return
+            else:
+                self.check_banned()
+                if self.banned is True:
+                    self.command = None
+                    return
+                if len(self.target_users) == 1:
+                    user = self.target_users[0]
+                else:
+                    user = 'none'
+                comargs = dict(user=user,
+                               message=self,
+                               workdir=self._kwargs.get('myworkdir'))
+                self.msg = self.command(**comargs)
+            return
+
+    def run_multiuser_command(self):
+        self.check_banned()
+        if self.banned is True:
+            self.command = None
+            return
+        for _user in self.target_users:
+            comargs = dict(user=_user,
+                           message=self,
+                           workdir=self._kwargs.get('myworkdir'))
+            self.msg += self.command(**comargs)
+        return
+
+    def run_fake_points(self, value):
+        ''' This method incorporates the FakeInternetPoints class '''
+        from fake_points import FakeInternetPoints
+        self.check_banned()
+        if self.banned is True:
+            return self.msg
+        self._fipchange = value
+        self.fip = FakeInternetPoints(self)
+        return self.fip.msg

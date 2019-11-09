@@ -13,6 +13,8 @@ def ban_user(**kwargs: dict) -> str:
     user = kwargs.get('user')
     message = kwargs.get('message')
     workdir = kwargs.get('workdir')
+    if user == 'none':
+        return ''
     if message.admin:
         try:
             with open('{0}/data/BANNED'.format(workdir), 'a') as banned_list:
@@ -21,7 +23,8 @@ def ban_user(**kwargs: dict) -> str:
         except Exception as e:
             msg = "Failed to load banned file, check permissions"
     else:
-        msg = '<@{0}> is not an admin'.format(message.user)
+        message.channel = message.user
+        msg = '<@{0}>, you are not an admin'.format(message.user)
     return msg
 
 
@@ -34,7 +37,8 @@ def unban_all(**kwargs: dict) -> str:
             banned_list.write('')
         msg = 'Cleared the ban list'
     else:
-        msg = '<@{0}> is not an admin'.format(message.user)
+        message.channel = message.user
+        msg = '<@{0}>, you are not an admin'.format(message.user)
     return msg
 
 
@@ -52,7 +56,8 @@ def unban_user(**kwargs: dict) -> str:
                     banned_list.write(line)
         msg = 'User <@{0}> is unbanned.\n'.format(user)
     else:
-        msg = '<@{0}> is not an admin'.format(message.user)
+        message.channel = message.user
+        msg = '<@{0}>, you are not an admin'.format(message.user)
     return msg
 
 

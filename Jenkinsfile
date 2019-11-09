@@ -4,7 +4,7 @@ pipeline {
   }
   environment {
     registryCredential = 'dockerhub'
-    version = "1.1.0.0-$BUILD_NUMBER"
+    version = "1.2.0.4-$BUILD_NUMBER"
     buildName = String.format("derrickwalton/slackbot:%s", version)
     linuxBuild = ''
     PYTHONPATH = "${WORKSPACE}"
