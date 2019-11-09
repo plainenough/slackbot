@@ -8,7 +8,7 @@ def alias():
     #  can leverage the kwargs object. This will include wether
     #  not your user is banned or an admin.
     alias = dict(
-            'help_me'=generate_help)
+            help_me=generate_help)
     return alias
 
 
