@@ -144,7 +144,7 @@ class Message(object):
                 if self.banned == True:
                     self.command = None
                     return
-                if self.target_users == 1:
+                if len(self.target_users) == 1:
                     user = self.target_users[0]
                 else:
                     user = 'none'
