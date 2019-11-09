@@ -170,6 +170,9 @@ class Message(object):
     def run_fake_points(self, value):
         ''' This method incorporates the FakeInternetPoints class '''
         from fake_points import FakeInternetPoints
+        self.check_banned()
+        if self.banned == True:
+            return self.msg
         self._fipchange = value
         self.fip = FakeInternetPoints(self)
         return self.fip.msg
