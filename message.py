@@ -71,9 +71,9 @@ class Message(object):
                 for banneduser in _banfile.read().split('\n'):
                     banned_users.append(banneduser)
             if self.user in banned_users:
-                _msg = "@<{0}> you are banned. "
+                _msg = "You are banned. "
                 _msg += "Please contact an admin."
-                self.msg = _msg.format(self.user)
+                self.msg = _msg
                 self.channel = self.user
                 self.banned = True
                 return 
