@@ -36,6 +36,7 @@ class Message(object):
         self.msg = ''
         self.admin = self.check_admin()
         self.banned = False
+        self.channel = data.get('channel')
         self.target_users = self.check_users()
         self.check_command()
         self.run_command()
