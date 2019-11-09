@@ -13,6 +13,8 @@ def ban_user(**kwargs: dict) -> str:
     user = kwargs.get('user')
     message = kwargs.get('message')
     workdir = kwargs.get('workdir')
+    if user == 'none':
+        return ''
     if message.admin:
         try:
             with open('{0}/data/BANNED'.format(workdir), 'a') as banned_list:
