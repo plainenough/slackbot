@@ -141,7 +141,7 @@ class Message(object):
                 return
             else:
                 self.check_banned()
-                if self.banned = True:
+                if self.banned == True:
                     self.command = None
                     return
                 if self.target_users == 1:
@@ -156,7 +156,7 @@ class Message(object):
 
     def run_multiuser_command(self):
         self.check_banned()
-        if self.banned = True:
+        if self.banned == True:
             self.command = None
             return
         for _user in self.target_users:
