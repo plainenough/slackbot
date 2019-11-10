@@ -24,20 +24,23 @@ kwargs = dict(myworkdir=os.path.dirname(_mypath),
 
 @RTMClient.run_on(event="message")
 def catch_message(**payload):
-    data = payload['data']
-    web_client = payload['web_client']
+    data, web_client = payload.get('data'), payload.get('webclient')
     logging.debug(data)
     message = Message(data, **kwargs)
     logging.debug(message)
     if message.msg == '':
-        logging.debug("Empty message: return None")
-        return None
-    else:
-        web_client.chat_postMessage(
-                username=config.get('BOTNAME'),
-                user=config.get('BOTUSERID'),
-                channel=message.channel,
-                text=message.msg)
+        logging.debug("Empty message: skip processing, nothing to return")
+        return 
+    send_message(message, web_client)
+    return
+
+
+def send_message(message, web_client):
+    web_client.chat_postMessage(
+        username=config.get('BOTNAME'),
+        user=config.get('BOTUSERID'),
+        channel=message.channel,
+        text=message.msg)
     return
 
 
