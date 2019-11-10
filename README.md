@@ -1,4 +1,5 @@
 # Slackbot - A python slackbot integration
+[![BCH compliance](https://bettercodehub.com/edge/badge/plainenough/slackbot?branch=master)](https://bettercodehub.com/)
 ## Versioning 
 major.minor.feature.patch-buildnumber
 * Major build numbers are always a breaking change, normally > 50% refactor.
