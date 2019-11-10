@@ -73,9 +73,16 @@ class FakeInternetPoints(object):
             _change = 5
         return _change
 
+    def save_score_file(self, points):
+        import pickle
+        myworkdir = self._kwargs.get('myworkdir')
+        _scorefile = open('{0}/data/score'.format(myworkdir), 'wb')
+        pickle.dump(points, _scorefile)
+        _scorefile.close()
+        return
+
     def set_user_points(self, message):
         """ Extracts dict from pickle rewrites on change. """
-        import pickle
         msg = ''
         points = {}
         scoredict = self.load_score_file()
@@ -97,8 +104,5 @@ class FakeInternetPoints(object):
             msg += _msg.format(user,
                                self.change,
                                points[user])
-        myworkdir = self._kwargs.get('myworkdir')
-        _scorefile = open('{0}/data/score'.format(myworkdir), 'wb')
-        pickle.dump(points, _scorefile)
-        _scorefile.close()
+        self.save_score_file(points)
         return msg
