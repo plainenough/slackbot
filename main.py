@@ -30,7 +30,7 @@ def catch_message(**payload):
     logging.debug(message)
     if message.msg == '':
         logging.debug("Empty message: skip processing, nothing to return")
-        return 
+        return
     send_message(message, web_client)
     return
 
