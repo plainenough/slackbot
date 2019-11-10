@@ -8,7 +8,7 @@ def discover_commands(logging):
         will be templated and should be easy to understand.
     """
     import importlib
-    file_list = filter_list()
+    file_list = filter_list(logging)
     commands = {}
     logging.debug("Checking files in file list for py extention.")
     for item in file_list:
@@ -32,7 +32,7 @@ def discover_commands(logging):
     return commands
 
 
-def filter_list():
+def filter_list(logging):
     import sys
     import os
     _mypath = os.path.abspath(__file__)
