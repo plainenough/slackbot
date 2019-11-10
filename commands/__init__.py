@@ -7,18 +7,8 @@ def discover_commands(logging):
         of the predefined command aliases for each command. This
         will be templated and should be easy to understand.
     """
-    import os
-    import sys
     import importlib
-    _mypath = os.path.abspath(__file__)
-    MYWORKDIR = os.path.dirname(_mypath)
-    logging.debug(MYWORKDIR)
-    _removal_list = ['__init__.py', '__pycache__', 'template.py']
-    file_list = os.listdir(MYWORKDIR)
-    logging.info("Remove files in the ban list - files to not import.")
-    for item in _removal_list:
-        logging.debug("removing {0}".format(item))
-        file_list.remove(item)
+    file_list = filter_list()
     commands = {}
     logging.debug("Checking files in file list for py extention.")
     for item in file_list:
@@ -40,6 +30,20 @@ def discover_commands(logging):
             for alias, function in _aliases.items():
                 commands[alias] = function
     return commands
+
+
+def filter_list():
+    import sys
+    import os
+    _mypath = os.path.abspath(__file__)
+    MYWORKDIR = os.path.dirname(_mypath)
+    logging.debug(MYWORKDIR)
+    file_list = os.listdir(MYWORKDIR)
+    _removal_list = ['__init__.py', '__pycache__', 'template.py']
+    for item in _removal_list:
+        logging.debug("removing {0}".format(item))
+        file_list.remove(item)
+    return file_list
 
 
 if __name__ == '__main__':
