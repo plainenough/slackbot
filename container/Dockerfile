@@ -2,7 +2,7 @@ FROM ubuntu:bionic
 RUN apt-get update &&\
 apt-get upgrade -y
 RUN apt-get install -y python3 python3-pip
-RUN pip3 install slackclient==2.2.1 \
+RUN pip3 install slackclient \
 pyyaml
 WORKDIR /opt/slackbot/
 COPY . /opt/slackbot
