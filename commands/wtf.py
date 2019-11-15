@@ -30,6 +30,6 @@ def check_ud(term):
     url = 'http://api.urbandictionary.com/v0/define?term={0}'
     search = requests.get(url.format(term))
     data = search.json()
-    results.append(data['lists'][0])
+    results.append(data['list'][0])
     msg = "Definition: \n\n{0}".format('\n\n'.join(results))
     return msg
