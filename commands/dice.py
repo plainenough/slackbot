@@ -20,7 +20,10 @@ def roll(**kwargs: dict) -> str:
         if 'd' not in com:
             continue
         upper = int(com.split('d')[1]) + 1
-        msg += "\nYour {0} roll is {1}".format(com, random.randrange(1, upper))
+        try:
+            msg += "\nYour {0} roll is {1}".format(com, random.randrange(1, upper))
+        except Exception as e:
+            msg = ''
     return msg
 
 
