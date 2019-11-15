@@ -3,7 +3,8 @@ RUN apt-get update &&\
 apt-get upgrade -y
 RUN apt-get install -y python3 python3-pip
 RUN pip3 install slackclient \
-pyyaml
+pyyaml \
+requests
 WORKDIR /opt/slackbot/
 COPY . /opt/slackbot
 CMD python3 main.py && tail -f /opt/slackbot/data/slackbot.log
