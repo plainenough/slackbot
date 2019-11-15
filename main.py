@@ -24,7 +24,7 @@ kwargs = dict(myworkdir=os.path.dirname(_mypath),
 
 @RTMClient.run_on(event="message")
 def catch_message(**payload):
-    data, web_client = payload.get('data'), payload.get('webclient')
+    data, web_client = payload.get('data'), payload.get('web_client')
     logging.debug(data)
     message = Message(data, **kwargs)
     logging.debug(message)
