@@ -22,8 +22,8 @@ def roll(**kwargs: dict) -> str:
         upper = int(com.split('d')[1]) + 1
         try:
             msg += "\nYour {0} roll is {1}".format(com, random.randrange(1, upper))
-        except Exception as e:
-            msg = ''
+        except ValueError as e:
+            return msg = ''
     return msg
 
 

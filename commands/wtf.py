@@ -15,7 +15,7 @@ def alias():
 def get_def(**kwargs: dict) -> str:
     """ This will lookup the string following wtfis """
     message = kwargs.get('message')
-    mytext = message.text
+    mytext = message._text
     _text = mytext.split('wtfis')[-1]
     if len(_text) > 20:
         msg = "Search term too long"
