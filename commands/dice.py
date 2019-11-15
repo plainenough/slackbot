@@ -7,15 +7,20 @@ def alias():
 
 
 def roll(**kwargs: dict) -> str:
-    """rolls a dice: roll d20 """
-    import random
+    """ rolls a dice: roll d20 """
     message = kwargs.get('message')
     _commands = []
-    msg = ''
     for com in message._text.split():
         if com == 'roll' or '':
             continue
         _commands.append(com)
+    return generate_message(_commands)
+
+
+def generate_message(_commands):
+    ''' Constructs the message for dice '''
+    import random
+    msg = ''
     for com in _commands:
         if 'd' not in com:
             continue
