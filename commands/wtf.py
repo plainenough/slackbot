@@ -15,7 +15,7 @@ def get_def(**kwargs: dict) -> str:
     mytext = message._text
     _text = mytext.split('wtfis')[-1]
     if len(_text) > 30:
-        msg = 'Search term "{0}" is too long. ' 
+        msg = 'Search term "{0}" is too long. '
         msg += "keep it under 30."
         return msg.format(_text)
     return check_ud(_text)

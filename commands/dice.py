@@ -21,8 +21,8 @@ def roll(**kwargs: dict) -> str:
             continue
         try:
             upper = int(com.split('d')[1]) + 1
-        except:
-            continue 
+        except Exception:
+            continue
         if upper < 2:
             continue
         msg += "\nYour {0} roll is {1}".format(com, random.randrange(1, upper))
