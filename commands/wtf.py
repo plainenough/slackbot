@@ -18,8 +18,9 @@ def get_def(**kwargs: dict) -> str:
     message.channel = message.user
     mytext = message._text
     _text = mytext.split('wtfis')[-1]
-    if len(_text) > 20:
-        msg = "Search term too long"
+    if len(_text) > 30:
+        msg = 'Search term "{0}" is too long. ' 
+        msg += "keep it under 30.".format(_text)
         return msg
     return check_ud(_text)
 
@@ -30,6 +31,6 @@ def check_ud(term):
     url = 'http://api.urbandictionary.com/v0/define?term={0}'
     search = requests.get(url.format(term))
     data = search.json()
-    results.append(data['list'][0])
+    results.append(data['list'][0]['definition'])
     msg = "Definition: \n\n{0}".format('\n\n'.join(results))
     return msg
