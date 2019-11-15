@@ -15,11 +15,11 @@ def alias():
 def get_def(**kwargs: dict) -> str:
     """ This will lookup the string following wtfis """
     message = kwargs.get('message')
+    message.channel = message.user
     mytext = message._text
     _text = mytext.split('wtfis')[-1]
     if len(_text) > 20:
         msg = "Search term too long"
-        message.channel = message.user
         return msg
     return check_ud(_text)
 
@@ -30,8 +30,6 @@ def check_ud(term):
     url = 'http://api.urbandictionary.com/v0/define?term={0}'
     search = requests.get(url.format(term))
     data = search.json()
-    for item in data['list']:
-        myitem = str(item['definition'])
-        results.append(myitem)
-    msg = "Definitions: \n\n{0}".format('\n\n'.join(results))
+    results.append(data['lists'][0])
+    msg = "Definition: \n\n{0}".format('\n\n'.join(results))
     return msg
