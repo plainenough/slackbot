@@ -3,12 +3,8 @@
 
 def alias():
     """ Custom commands and the functions they map too """
-    #  This is a required portion of the commands to actually
-    #  load all of the variations and new methods. Your commands
-    #  can leverage the kwargs object. This will include wether
-    #  not your user is banned or an admin.
     alias = dict(
-            wtfis=get_def)
+            wtf_is=get_def)
     return alias
 
 
@@ -26,6 +22,7 @@ def get_def(**kwargs: dict) -> str:
 
 
 def check_ud(term):
+    ''' This will lookup against urban dictionary '''
     import requests
     results = []
     url = 'http://api.urbandictionary.com/v0/define?term={0}'
