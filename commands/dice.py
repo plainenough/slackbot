@@ -23,7 +23,7 @@ def roll(**kwargs: dict) -> str:
         try:
             msg += "\nYour {0} roll is {1}".format(com, random.randrange(1, upper))
         except ValueError as e:
-            return msg = ''
+            return ''
     return msg
 
 
