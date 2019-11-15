@@ -19,11 +19,11 @@ def roll(**kwargs: dict) -> str:
     for com in _commands:
         if 'd' not in com:
             continue
-        upper = int(com.split('d')[1]) + 1
         try:
+            upper = int(com.split('d')[1]) + 1
             msg += "\nYour {0} roll is {1}".format(com, random.randrange(1, upper))
-        except ValueError as e:
-            return ''
+        except:
+            continue
     return msg
 
 
