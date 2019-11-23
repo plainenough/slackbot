@@ -6,7 +6,7 @@ class Message(object):
     ''' Test class for command test '''
 
     def __init__(self):
-        self._text = 'wtf_is test because this string is too long to lookup'
+        self._text = 'test because this string is too long to lookup'
         self.channel = '#general'
         self.user = 'bob'
 
