@@ -25,7 +25,7 @@ kwargs = dict(myworkdir=os.path.dirname(_mypath),
               botid=config.get('BOTID'),
               botuserid=config.get('BOTUSERID'),
               botname=config.get('BOTNAME'),
-              admins=config.get('ADMINS')
+              admins=config.get('ADMINS'),
               score=score,
               banned=banned)
 
