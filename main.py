@@ -56,17 +56,19 @@ def save_to_disk(fname, data):
     while True:
         time.sleep(30)
         mwd = kwargs.get(myworkdir)
-        with open('{0}/data/{1}'.format(mwd, fname), 'w') as myfile:
-            myfile.write(pickle.dump(data))
+        myfile = open('{0}/data/{1}'.format(mwd, fname), 'wb')
+        pickle.dump(data, myfile)
+        myfile.close()
     return
 
 
 def pull_from_disk(fname):
     try:
         mwd = kwargs.get(myworkdir)
-        with open('{0}/data/{1}'.format(mwd, fname), 'r') as myfile:
-            data = pickle.load(myfile.read())
-            kwargs[fname] = data
+        myfile = open('{0}/data/{1}'.format(mwd, fname), 'rb')
+        data = pickle.load(myfile)
+        kwargs[fname] = data
+        myfile.close()
     except Exception as error:
         text = "Failed to load filename: {0} --- {1}"
         logging.debug(text.format(fname, error))
