@@ -22,7 +22,7 @@ def get_def(**kwargs: dict) -> str:
 
 
 def check_ud(term):
-    ''' This will lookup against urban dictionary '''
+    """ This will lookup against urban dictionary """
     import requests
     results = []
     msg = ''

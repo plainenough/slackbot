@@ -2,7 +2,7 @@
 
 
 def alias():
-    ''' Custom commands and the functions they map too '''
+    """ Custom commands and the functions they map too """
     alias = dict(
             mypoints=my_points,
             scoreboard=all_points,
@@ -11,7 +11,7 @@ def alias():
 
 
 def my_points(**kwargs: dict) -> str:
-    ''' Get user FakeInternetPoints count for user '''
+    """ Get user FakeInternetPoints count for user """
     import pickle
     user = kwargs['message'].user
     score = kwargs.get('score')
@@ -23,7 +23,7 @@ def my_points(**kwargs: dict) -> str:
 
 
 def all_points(**kwargs: dict) -> str:
-    ''' Get a sorted list of fakeinternetpoints for team; requires admin '''
+    """ Get a sorted list of fakeinternetpoints for team; requires admin """
     score = kwargs.get('score')
     msg = ''
     if not kwargs['message'].admin:
@@ -38,7 +38,7 @@ def all_points(**kwargs: dict) -> str:
 
 
 def reset_points(**kwargs: dict) -> str:
-    ''' Resets scoreboard for entire team; requires admin '''
+    """ Resets scoreboard for entire team; requires admin """
     score = kwargs.get('score')
     msg = ''
     if not kwargs['message'].admin:

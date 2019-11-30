@@ -39,7 +39,7 @@ class FakeInternetPoints(object):
         return msg
 
     def process_command(self, message):
-        ''' Counts all of the values to generate a number '''
+        """ Counts all of the values to generate a number """
         _change = 0
         count = 0
         for value in message:
@@ -54,7 +54,7 @@ class FakeInternetPoints(object):
         return self.check_upper_value(_change)
 
     def check_upper_value(_change):
-        ''' Hardcoded to only allow a change of 5 or -5 '''
+        """ Hardcoded to only allow a change of 5 or -5 """
         if _change < -5:
             _change = -5
         if _change > 5:
