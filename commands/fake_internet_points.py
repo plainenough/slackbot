@@ -12,7 +12,6 @@ def alias():
 
 def my_points(**kwargs: dict) -> str:
     """ Get user FakeInternetPoints count for user """
-    import pickle
     user = kwargs['message'].user
     score = kwargs.get('score')
     if user in score:
@@ -28,12 +27,12 @@ def all_points(**kwargs: dict) -> str:
     msg = ''
     if not kwargs['message'].admin:
         return msg
-    if scored == {}:
+    if score == {}:
         msg = 'No one on your team has gained or lost any fake internet points'
     sorted_score = sorted(score, key=score.__getitem__)
     sorted_score.reverse()
     for user in sorted_score:
-        msg += "<@{0}> has a score of {1}\n".format(user, scored[user])
+        msg += "<@{0}> has a score of {1}\n".format(user, score[user])
     return msg
 
 
