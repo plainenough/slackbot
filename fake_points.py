@@ -53,7 +53,7 @@ class FakeInternetPoints(object):
                 _change -= 1
         return self.check_upper_value(_change)
 
-    def check_upper_value(_change):
+    def check_upper_value(self, _change):
         """ Hardcoded to only allow a change of 5 or -5 """
         if _change < -5:
             _change = -5
