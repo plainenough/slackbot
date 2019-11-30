@@ -1,10 +1,16 @@
 #!/usr/bin/env python3
 import logging
 import os
+import pickle
+import threading
+import time
 from slack import RTMClient
 from commands import discover_commands
 from config import obtain_config
 from message import Message
+
+score = {}
+banned = {}
 
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s %(name)-12s %(levelname)-8s' +
@@ -19,7 +25,9 @@ kwargs = dict(myworkdir=os.path.dirname(_mypath),
               botid=config.get('BOTID'),
               botuserid=config.get('BOTUSERID'),
               botname=config.get('BOTNAME'),
-              admins=config.get('ADMINS'))
+              admins=config.get('ADMINS')
+              score=score,
+              banned=banned)
 
 
 @RTMClient.run_on(event="message")
@@ -44,10 +52,45 @@ def send_message(message, web_client):
     return
 
 
+def save_to_disk(fname, data):
+    while True:
+        time.sleep(30)
+        mwd = kwargs.get(myworkdir)
+        with open('{0}/data/{1}'.format(mwd, fname), 'w') as myfile:
+            myfile.write(pickle.dump(data))
+    return
+
+
+def pull_from_disk(fname):
+    try:
+        mwd = kwargs.get(myworkdir)
+        with open('{0}/data/{1}'.format(mwd, fname), 'r') as myfile:
+            data = pickle.load(myfile.read())
+            kwargs[fname] = data
+    except Exception as error:
+        text = "Failed to load filename: {0} --- {1}"
+        logging.debug(text.format(fname, error))
+    return
+
+
 def main():
     slack_token = config.get('TOKEN')
     rtm_client = RTMClient(token=slack_token)
-    rtm_client.start()
+    pull_from_disk('score')
+    pull_from_disk('banned')
+    score = threading.Thread(taget=save_to_disk, args=('score'))
+    banned = threading.Thread(taget=save_to_disk, args=('banned'))
+    client = threading.Thread(target=rtm_client.start, args=())
+    logging.info("Starting score threading")
+    score.start()
+    logging.info("Starting banned threading")
+    banned.start()
+    logging.info("Starting client threading")
+    client.start()
+    score.join()
+    banned.join()
+    client.join()
+    return
 
 
 if __name__ == '__main__':
