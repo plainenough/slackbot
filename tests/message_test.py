@@ -5,6 +5,7 @@ import pytest
 def ban(**kwargs):
     return 'True'
 
+banned = {'NOADMIN': True}
 
 @pytest.fixture
 def fixture_message():
@@ -15,6 +16,7 @@ def fixture_message():
     mycommands = dict(ban=ban)
     kwargs = dict(myworkdir=myworkdir,
                   commands=mycommands,
+                  banned=banned,
                   admins=['UEMN5QPLM'])
     #  Just a message I captured from my bot.
     _message = {'client_msg_id': 'just-a-message-id',
@@ -41,6 +43,7 @@ def fixture_message_not_admin():
     mycommands = dict(ban=ban)
     kwargs = dict(myworkdir=myworkdir,
                   commands=mycommands,
+                  banned=banned,
                   admins=['UEMN5QPLM'])
     _message = {'client_msg_id': 'just-a-message-id',
                 'suppress_notification': False,
@@ -66,6 +69,7 @@ def fixture_deleted_message():
     mycommands = dict(ban=ban)
     kwargs = dict(myworkdir=myworkdir,
                   commands=mycommands,
+                  banned=banned,
                   admins=['UEMN5QPLM'])
     _message = {'subtype': 'message_deleted',
                 'hidden': True, 'deleted_ts': '1572708401.008200',
@@ -86,6 +90,7 @@ def fixture_bot_message():
     mycommands = dict(ban=ban)
     kwargs = dict(myworkdir=myworkdir,
                   commands=mycommands,
+                  banned=banned,
                   admins=['UEMN5QP'],
                   botid='ISABOT')
     #  Just a message I captured from my bot.
