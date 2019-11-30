@@ -38,7 +38,6 @@ class FakeInternetPoints(object):
             msg = self.set_user_points(message)
         return msg
 
-
     def process_command(self, message):
         ''' Counts all of the values to generate a number '''
         _change = 0

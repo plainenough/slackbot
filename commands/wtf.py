@@ -25,7 +25,7 @@ def check_ud(term):
     ''' This will lookup against urban dictionary '''
     import requests
     results = []
-    msg=''
+    msg = ''
     url = 'http://api.urbandictionary.com/v0/define?term={0}'
     search = requests.get(url.format(term))
     if search.ok:
