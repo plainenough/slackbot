@@ -29,7 +29,7 @@ def unban_all(**kwargs: dict) -> str:
     message = kwargs.get('message')
     banned = kwargs.get('banned')
     if message.admin:
-        banned = {}
+        banned.clear()
         msg = 'Cleared the ban list'
     else:
         message.channel = message.user
