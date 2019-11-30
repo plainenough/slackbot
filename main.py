@@ -72,16 +72,17 @@ def pull_from_disk(fname):
     except Exception as error:
         text = "Failed to load filename: {0} --- {1}"
         logging.debug(text.format(fname, error))
-    return
+        data = {}
+    return data
 
 
 def main():
     slack_token = config.get('TOKEN')
     rtm_client = RTMClient(token=slack_token)
-    pull_from_disk('score')
-    pull_from_disk('banned')
-    score = threading.Thread(target=save_to_disk, args=('score'))
-    banned = threading.Thread(target=save_to_disk, args=('banned'))
+    score = pull_from_disk('score')
+    banned = pull_from_disk('banned')
+    score = threading.Thread(target=save_to_disk, args=('score', score))
+    banned = threading.Thread(target=save_to_disk, args=('banned', banned))
     client = threading.Thread(target=rtm_client.start, args=())
     logging.info("Starting score threading")
     score.start()
