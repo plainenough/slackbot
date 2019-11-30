@@ -83,16 +83,13 @@ def main():
     banned = pull_from_disk('banned')
     score = threading.Thread(target=save_to_disk, args=('score', score))
     banned = threading.Thread(target=save_to_disk, args=('banned', banned))
-    client = threading.Thread(target=rtm_client.start, args=())
     logging.info("Starting score threading")
     score.start()
     logging.info("Starting banned threading")
     banned.start()
-    logging.info("Starting client threading")
-    client.start()
     score.join()
     banned.join()
-    client.join()
+    rtm_client.start()
     return
 
 
