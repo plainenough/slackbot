@@ -66,20 +66,13 @@ class Message(object):
         ''' Checks to see if the user is banned: returns boolean '''
         myworkdir = self._kwargs.get('myworkdir')
         self.channel = self._data.get('channel')
-        try:
-            banned_users = []
-            with open('{0}/data/BANNED'.format(myworkdir), 'r') as _banfile:
-                for banneduser in _banfile.read().split('\n'):
-                    banned_users.append(banneduser)
-            if self.user in banned_users:
-                _msg = "You are banned. "
-                _msg += "Please contact an admin."
-                self.msg = _msg
-                self.channel = self.user
-                self.banned = True
-                return
-        except Exception as error:
-            return
+        banned = self._kwargs.get('banned')
+        if self.user in banned:
+            _msg = "You are banned. "
+            _msg += "Please contact an admin."
+            self.msg = _msg
+            self.channel = self.user
+            self.banned = True
         return
 
     def check_bot(self):

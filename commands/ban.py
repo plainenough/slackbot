@@ -12,16 +12,12 @@ def ban_user(**kwargs: dict) -> str:
     """ban_user will ban a user from using commands"""
     user = kwargs.get('user')
     message = kwargs.get('message')
-    workdir = kwargs.get('workdir')
+    banned = kwargs.get('banned')
     if user == 'none':
         return ''
     if message.admin:
-        try:
-            with open('{0}/data/BANNED'.format(workdir), 'a') as banned_list:
-                banned_list.write('{0}\n'.format(user))
-            msg = 'User <@{0}> is banned.\n'.format(user)
-        except Exception as e:
-            msg = "Failed to load banned file, check permissions"
+        banned[user] = True
+        msg = 'User <@{0}> is banned.\n'.format(user)
     else:
         message.channel = message.user
         msg = '<@{0}>, you are not an admin'.format(message.user)
@@ -31,10 +27,9 @@ def ban_user(**kwargs: dict) -> str:
 def unban_all(**kwargs: dict) -> str:
     """unban_all will unban all users"""
     message = kwargs.get('message')
-    workdir = kwargs.get('workdir')
+    banned = kwargs.get('banned')
     if message.admin:
-        with open('{0}/data/BANNED'.format(workdir), 'w') as banned_list:
-            banned_list.write('')
+        banned = {}
         msg = 'Cleared the ban list'
     else:
         message.channel = message.user
@@ -46,14 +41,9 @@ def unban_user(**kwargs: dict) -> str:
     """unban_user will lift an existing user ban"""
     user = kwargs.get('user')
     message = kwargs.get('message')
-    workdir = kwargs.get('workdir')
+    banned = kwargs.get('banned')
     if message.admin:
-        with open('{0}/data/BANNED'.format(workdir), 'r') as banned_list:
-            temp_list = banned_list.readlines()
-        with open('{0}/data/BANNED'.format(workdir), 'w') as banned_list:
-            for line in temp_list:
-                if line.strip('\n') != user:
-                    banned_list.write(line)
+        banned.pop(user, None)
         msg = 'User <@{0}> is unbanned.\n'.format(user)
     else:
         message.channel = message.user
