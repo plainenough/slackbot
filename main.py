@@ -52,7 +52,7 @@ def send_message(message, web_client):
     return
 
 
-def save_to_disk(fname, data):
+def save_to_disk(fname, data, **kwargs):
     while True:
         time.sleep(30)
         mwd = kwargs.get(myworkdir)
@@ -81,8 +81,8 @@ def main():
     rtm_client = RTMClient(token=slack_token)
     score = pull_from_disk('score')
     banned = pull_from_disk('banned')
-    score = threading.Thread(target=save_to_disk, args=('score', score))
-    banned = threading.Thread(target=save_to_disk, args=('banned', banned))
+    score = threading.Thread(target=save_to_disk, args=('score', score, **kwargs))
+    banned = threading.Thread(target=save_to_disk, args=('banned', banned, **kwargs))
     logging.info("Starting score threading")
     score.start()
     logging.info("Starting banned threading")
