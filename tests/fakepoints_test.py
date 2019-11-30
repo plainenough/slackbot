@@ -3,7 +3,6 @@ import pytest
 score = {}
 
 
-
 class Message(object):
     ''' Test class for command test '''
 

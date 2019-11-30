@@ -5,7 +5,9 @@ import pytest
 def ban(**kwargs):
     return 'True'
 
+
 banned = {'NOADMIN': True}
+
 
 @pytest.fixture
 def fixture_message():

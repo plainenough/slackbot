@@ -62,9 +62,10 @@ def fixture_d1_dice():
     return commands, myroll
 
 
-def test_alias(fixture_dice):
-    commands, myroll = fixture_dice
-    assert commands
+def test_alias():
+    from commands import dice
+    commands = dice.alias()
+    assert 'roll' in commands
 
 
 def test_roll(fixture_dice):
