@@ -43,6 +43,6 @@ def reset_points(**kwargs: dict) -> str:
     msg = ''
     if not kwargs['message'].admin:
         return msg
-    score = {}
+    score.clear()
     msg = "All scores have been reset"
     return msg
