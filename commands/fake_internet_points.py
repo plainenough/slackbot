@@ -12,8 +12,8 @@ def alias():
 
 def my_points(**kwargs: dict) -> str:
     """ Get user FakeInternetPoints count for user """
-    user = kwargs['message'].user
-    score = kwargs.get('score')
+    user = kwargs.get('message').user
+    score = kwargs.get('message')._kwargs.get('score')
     if user in score:
         msg = '<@{0}> has {1} points'.format(user, score[user])
     else:
