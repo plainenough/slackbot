@@ -87,6 +87,7 @@ async def run_client(**kwargs):
         logging.debug(error)
     return
 
+
 def main():
     loop = asyncio.get_event_loop()
     score = pull_from_disk('score')
