@@ -23,7 +23,8 @@ def my_points(**kwargs: dict) -> str:
 
 def all_points(**kwargs: dict) -> str:
     """ Get a sorted list of fakeinternetpoints for team; requires admin """
-    score = kwargs.get('score')
+    message = kwargs.get('message')
+    score = message._kwargs.get('score')
     msg = ''
     if not kwargs['message'].admin:
         return msg
