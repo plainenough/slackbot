@@ -39,7 +39,7 @@ def all_points(**kwargs: dict) -> str:
 
 def reset_points(**kwargs: dict) -> str:
     """ Resets scoreboard for entire team; requires admin """
-    score = kwargs.get('score')
+    score = kwargs.get('message')._kwargs.get('score')
     msg = ''
     if not kwargs['message'].admin:
         return msg
