@@ -4,6 +4,7 @@ import os
 import pickle
 import threading
 import time
+import asyncio
 from slack import RTMClient
 from commands import discover_commands
 from config import obtain_config
@@ -52,10 +53,10 @@ def send_message(message, web_client):
     return
 
 
-def save_to_disk(fname, data, **kwargs):
+async def save_to_disk(fname, data, **kwargs):
     while True:
-        time.sleep(30)
-        mwd = kwargs.get(myworkdir)
+        await asyncio.sleep(30)
+        mwd = kwargs.get('myworkdir')
         myfile = open('{0}/data/{1}'.format(mwd, fname), 'wb')
         pickle.dump(data, myfile)
         myfile.close()
@@ -64,7 +65,7 @@ def save_to_disk(fname, data, **kwargs):
 
 def pull_from_disk(fname):
     try:
-        mwd = kwargs.get(myworkdir)
+        mwd = kwargs.get('myworkdir')
         myfile = open('{0}/data/{1}'.format(mwd, fname), 'rb')
         data = pickle.load(myfile)
         kwargs[fname] = data
@@ -76,20 +77,27 @@ def pull_from_disk(fname):
     return data
 
 
+async def run_client(**kwargs):
+    try:
+        print("starting client")
+        slack_token = config.get('TOKEN')
+        rtm_client = RTMClient(token=slack_token)
+        rtm_client.start()
+    except Exception as error:
+        logging.debug(error)
+    return
+
 def main():
-    slack_token = config.get('TOKEN')
-    rtm_client = RTMClient(token=slack_token)
+    loop = asyncio.get_event_loop()
     score = pull_from_disk('score')
     banned = pull_from_disk('banned')
-    score = threading.Thread(target=save_to_disk, args=('score', score, **kwargs))
-    banned = threading.Thread(target=save_to_disk, args=('banned', banned, **kwargs))
-    logging.info("Starting score threading")
-    score.start()
-    logging.info("Starting banned threading")
-    banned.start()
-    score.join()
-    banned.join()
-    rtm_client.start()
+    try:
+        asyncio.ensure_future(run_client(**kwargs))
+        asyncio.ensure_future(save_to_disk('score', score, **kwargs))
+        asyncio.ensure_future(save_to_disk('banned', banned, **kwargs))
+        loop.run_forever()
+    except KeyboardInterrupt:
+        loop.close()
     return
 
 
