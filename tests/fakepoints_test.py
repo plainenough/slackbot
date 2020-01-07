@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import pytest
-score = {}
 
 
 class Message(object):
@@ -11,6 +10,7 @@ class Message(object):
         self.channel = '#general'
         self.user = 'bob'
         self.target_users = ['FRED']
+        score = {}
         self._kwargs = dict(score=score)
 
 

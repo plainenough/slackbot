@@ -10,9 +10,8 @@ class Message(object):
         self.channel = '#general'
         self.user = 'bob'
         self.admin = True
-
-
-score = {'fred': 1, 'bob': 2}
+        score = {'fred': 1, 'bob': 2}
+        self._kwargs = dict(score=score)
 
 
 @pytest.fixture
@@ -21,8 +20,7 @@ def fixture_fiptools():
     message = Message()
     kwargs = dict(user='bob',
                   channel=message.channel,
-                  message=message,
-                  score=score)
+                  message=message)
     mypoints = fake_internet_points.my_points(**kwargs)
     allpoints = fake_internet_points.all_points(**kwargs)
     return mypoints, allpoints
