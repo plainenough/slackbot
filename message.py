@@ -56,34 +56,27 @@ class Message(object):
         return format_value
 
     def check_admin(self):
-        ''' Checks to see if the user is an admin: returns boolean '''
+        """ Checks to see if the user is an admin: returns boolean """
         if self.user in self._kwargs.get('admins'):
             return True
         else:
             return False
 
     def check_banned(self):
-        ''' Checks to see if the user is banned: returns boolean '''
+        """ Checks to see if the user is banned: returns boolean """
         myworkdir = self._kwargs.get('myworkdir')
         self.channel = self._data.get('channel')
-        try:
-            banned_users = []
-            with open('{0}/data/BANNED'.format(myworkdir), 'r') as _banfile:
-                for banneduser in _banfile.read().split('\n'):
-                    banned_users.append(banneduser)
-            if self.user in banned_users:
-                _msg = "You are banned. "
-                _msg += "Please contact an admin."
-                self.msg = _msg
-                self.channel = self.user
-                self.banned = True
-                return
-        except Exception as error:
-            return
+        banned = self._kwargs.get('banned')
+        if self.user in banned:
+            _msg = "You are banned. "
+            _msg += "Please contact an admin."
+            self.msg = _msg
+            self.channel = self.user
+            self.banned = True
         return
 
     def check_bot(self):
-        ''' Checks if the message was sent from the bot user '''
+        """ Checks if the message was sent from the bot user """
         if self._data.get('bot_id'):
             if self._data.get('bot_id') == self._kwargs.get('botid'):
                 self.command = False
@@ -92,7 +85,7 @@ class Message(object):
         return
 
     def check_command(self):
-        ''' Grabs the first command from text: intentially only one '''
+        """ Grabs the first command from text: intentially only one """
         if not self._text:
             return
         for value in self._text.split(' '):
@@ -107,7 +100,7 @@ class Message(object):
         return
 
     def check_message(self):
-        ''' Checks the message type againsts ignore list '''
+        """ Checks the message type againsts ignore list """
         ignore_types = ['message_changed',
                         'bot_message',
                         'message_deleted']
@@ -116,7 +109,7 @@ class Message(object):
         return
 
     def check_users(self):
-        ''' Grabs all of the user ids from the text: returns list '''
+        """ Grabs all of the user ids from the text: returns list """
         import re
         target_users = []
         if not self._text:
@@ -168,7 +161,7 @@ class Message(object):
         return
 
     def run_fake_points(self, value):
-        ''' This method incorporates the FakeInternetPoints class '''
+        """ This method incorporates the FakeInternetPoints class """
         from fake_points import FakeInternetPoints
         self.check_banned()
         if self.banned is True:

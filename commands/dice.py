@@ -18,7 +18,7 @@ def roll(**kwargs: dict) -> str:
 
 
 def generate_message(_commands):
-    ''' Constructs the message for dice '''
+    """ Constructs the message for dice """
     import random
     msg = ''
     for com in _commands:

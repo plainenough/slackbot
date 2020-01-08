@@ -10,8 +10,8 @@ class FakeInternetPoints(object):
         msg(str): The message posted by the bot
 
         Methods:
+        check_upper_value: Confirms an int isnt >5 or <-5
         check_valid_user: Verifies the user isn't giving themselves points
-        load_score_file: Loads scorefile from disc
         process_command: Counts the qualifiers in a command
         set_user_points: Loads existing points and appends new values to dict
 
@@ -38,24 +38,8 @@ class FakeInternetPoints(object):
             msg = self.set_user_points(message)
         return msg
 
-    def load_score_file(self):
-        ''' Handles Loading the score file '''
-        import pickle
-        myworkdir = self._kwargs.get('myworkdir')
-        try:
-            _scorefile = open('{0}/data/score'.format(myworkdir), 'rb')
-        except Exception as error:
-            points = {}
-            _scorefile = open('{0}/data/score'.format(myworkdir), 'wb')
-            pickle.dump(points, _scorefile)
-            _scorefile.close
-            _scorefile = open('{0}/data/score'.format(myworkdir), 'rb')
-        scoredict = pickle.load(_scorefile)
-        _scorefile.close()
-        return scoredict
-
     def process_command(self, message):
-        ''' Hardcoded to only allow a change of 5 or -5 '''
+        """ Counts all of the values to generate a number """
         _change = 0
         count = 0
         for value in message:
@@ -67,34 +51,27 @@ class FakeInternetPoints(object):
                 _change += 1
             if value == "-":
                 _change -= 1
+        return self.check_upper_value(_change)
+
+    def check_upper_value(self, _change):
+        """ Hardcoded to only allow a change of 5 or -5 """
         if _change < -5:
             _change = -5
         if _change > 5:
             _change = 5
         return _change
 
-    def save_score_file(self, points):
-        import pickle
-        myworkdir = self._kwargs.get('myworkdir')
-        _scorefile = open('{0}/data/score'.format(myworkdir), 'wb')
-        pickle.dump(points, _scorefile)
-        _scorefile.close()
-        return
-
     def set_user_points(self, message):
-        """ Extracts dict from pickle rewrites on change. """
+        """ Adds users points to score dict """
         msg = ''
-        points = {}
-        scoredict = self.load_score_file()
-        for user, value in scoredict.items():
-            points[user] = int(value)
+        score = message._kwargs.get('score')
         for user in message.target_users:
             _msg1 = "<@{0}> has changed by {1} "
             _msg2 = ", now they have {2} in total.\n"
-            if user in points:
-                points[user] += self.change
+            if user in score:
+                score[user] += self.change
             else:
-                points[user] = self.change
+                score[user] = self.change
             if self.change == 0:
                 return msg
             elif self.change in [1, -1]:
@@ -103,6 +80,5 @@ class FakeInternetPoints(object):
                 _msg = "{0}points{1}".format(_msg1, _msg2)
             msg += _msg.format(user,
                                self.change,
-                               points[user])
-        self.save_score_file(points)
+                               score[user])
         return msg
