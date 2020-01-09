@@ -16,7 +16,8 @@ def create_config():
         for line in TEMPLATE:
             config_file.write(line)
 
-if __name__ == '__main__':
+
+def main():
     try: 
         with open('data/config.yaml', 'r') as config:
             yaml.load(config.read())
@@ -29,3 +30,7 @@ if __name__ == '__main__':
         print("Config invalid check your config")
     except: 
         print("Unknown error: check permissions")
+    return
+
+if __name__ == '__main__':
+    main()
