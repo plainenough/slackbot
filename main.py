@@ -63,6 +63,15 @@ async def save_to_disk(fname, data, **kwargs):
     return
 
 
+async def check_for_runners(loop):
+    while True:
+        await asyncio.sleep(30)
+        if len(asyncio.Task.all_tasks(loop)) < 5:
+            loop.run_until_complete(loop.shutdown_asyncgens())
+            loop.close()
+            log.debug("A worker died. So should I. :(")
+    return
+
 def pull_from_disk(fname):
     try:
         mwd = kwargs.get('myworkdir')
@@ -96,9 +105,11 @@ def main():
         asyncio.ensure_future(run_client(**kwargs))
         asyncio.ensure_future(save_to_disk('score', score, **kwargs))
         asyncio.ensure_future(save_to_disk('banned', banned, **kwargs))
+        asyncio.ensure_future(check_for_runners(loop))
         loop.run_forever()
     except KeyboardInterrupt:
-        loop.close()
+        import sys
+        sys.exit(1)
     return
 
 
