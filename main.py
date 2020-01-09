@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import logging
+import sys
 import os
 import pickle
 import threading
@@ -54,6 +55,7 @@ def send_message(message, web_client):
 
 
 async def save_to_disk(fname, data, **kwargs):
+    logging.debug("starting {0} worker".format(fname))
     while True:
         await asyncio.sleep(30)
         mwd = kwargs.get('myworkdir')
@@ -65,12 +67,21 @@ async def save_to_disk(fname, data, **kwargs):
 
 async def check_for_runners(loop):
     while True:
-        await asyncio.sleep(30)
+        await asyncio.sleep(10)
         if len(asyncio.Task.all_tasks(loop)) < 5:
-            loop.run_until_complete(loop.shutdown_asyncgens())
-            loop.close()
-            log.debug("A worker died. So should I. :(")
+            logging.error("A worker died. So should I. :(")
+            tasks = []
+            for task in asyncio.all_tasks():
+                tasks.append(task)
+                if task == asyncio.current_task():
+                    continue
+                task.cancel()
+            sys.exit(1)
+        else:
+            logging.debug("{0} Runners in loop.".format(
+                len(asyncio.Task.all_tasks(loop))))
     return
+
 
 def pull_from_disk(fname):
     try:
@@ -87,13 +98,10 @@ def pull_from_disk(fname):
 
 
 async def run_client(**kwargs):
-    try:
-        print("starting client")
-        slack_token = config.get('TOKEN')
-        rtm_client = RTMClient(token=slack_token)
-        rtm_client.start()
-    except Exception as error:
-        logging.debug(error)
+    logging.info("starting client")
+    slack_token = config.get('TOKEN')
+    rtm_client = RTMClient(token=slack_token)
+    rtm_client.start()
     return
 
 
@@ -101,22 +109,13 @@ def main():
     loop = asyncio.get_event_loop()
     score = pull_from_disk('score')
     banned = pull_from_disk('banned')
-    try:
-        asyncio.ensure_future(run_client(**kwargs))
-        asyncio.ensure_future(save_to_disk('score', score, **kwargs))
-        asyncio.ensure_future(save_to_disk('banned', banned, **kwargs))
-        asyncio.ensure_future(check_for_runners(loop))
-        loop.run_forever()
-    except KeyboardInterrupt:
-        import sys
-        sys.exit(1)
+    asyncio.ensure_future(run_client(**kwargs))
+    asyncio.ensure_future(save_to_disk('score', score, **kwargs))
+    asyncio.ensure_future(save_to_disk('banned', banned, **kwargs))
+    asyncio.ensure_future(check_for_runners(loop))
+    loop.run_forever()
     return
 
 
 if __name__ == '__main__':
-    import sys
-    try:
-        main()
-    except KeyboardInterrupt:
-        logging.info("User interupt, stopping application")
-        sys.exit(1)
+    main()
