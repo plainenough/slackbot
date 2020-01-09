@@ -21,15 +21,19 @@ logging.basicConfig(level=logging.DEBUG,
                     filename='data/slackbot.log')
 _mypath = os.path.abspath(__file__)
 config = obtain_config(logging)
-kwargs = dict(myworkdir=os.path.dirname(_mypath),
-              commands=discover_commands(logging),
-              slack_token=config.get('TOKEN'),
-              botid=config.get('BOTID'),
-              botuserid=config.get('BOTUSERID'),
-              botname=config.get('BOTNAME'),
-              admins=config.get('ADMINS'),
-              score=score,
-              banned=banned)
+kwargs = {}
+
+def set_args():
+    kwargs = dict(myworkdir=os.path.dirname(_mypath),
+                  commands=discover_commands(logging),
+                  slack_token=config.get('TOKEN'),
+                  botid=config.get('BOTID'),
+                  botuserid=config.get('BOTUSERID'),
+                  botname=config.get('BOTNAME'),
+                  admins=config.get('ADMINS'),
+                  score=score,
+                  banned=banned)
+    return kwargs
 
 
 @RTMClient.run_on(event="message")
@@ -75,6 +79,7 @@ async def check_for_runners(loop):
                 tasks.append(task)
                 if task == asyncio.current_task():
                     continue
+                logging.error("Cancelling task {0}".format(task))
                 task.cancel()
             sys.exit(1)
         else:
@@ -118,4 +123,5 @@ def main():
 
 
 if __name__ == '__main__':
+    kwargs = set_args()
     main()
