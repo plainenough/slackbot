@@ -92,10 +92,8 @@ class Message(object):
             if str(value) in self._list_commands:
                 self.command = self._list_commands.get(value)
                 return
-            if value.startswith('-') or value.startswith('+'):
-                self.command = False
+            elif value.startswith('-') or value.startswith('+'):
                 self.msg = self.run_fake_points(value)
-                return
         self.command = False
         return
 
