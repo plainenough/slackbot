@@ -86,6 +86,7 @@ class Message(object):
 
     def check_command(self):
         """ Grabs the first command from text: intentially only one """
+        self.command = False
         if not self._text:
             return
         for value in self._text.split(' '):
@@ -94,7 +95,6 @@ class Message(object):
                 return
             elif value.startswith('-') or value.startswith('+'):
                 self.msg = self.run_fake_points(value)
-        self.command = False
         return
 
     def check_message(self):
