@@ -16,8 +16,9 @@ class Message(object):
     check_bot: Checks to see if the bot user sent the message
     check_command: Checks for first command in text
     check_message: Check for blackisted message types
-    check_user: Checks for users in text
+    check_users: Checks for users in text
     run_command: Executes the command based on text input
+    run_multiuser_command: Executes the command for multiple users
     run_fake_points: Executes fakepoint class
 
     Note:
@@ -125,6 +126,7 @@ class Message(object):
         return target_users
 
     def run_command(self):
+        """ Runs a single command targeted at a single user """
         self.check_bot()
         self.check_message()
         if self.command:
@@ -147,6 +149,7 @@ class Message(object):
             return
 
     def run_multiuser_command(self):
+        """ Runs a single command targeted at multiple users """
         self.check_banned()
         if self.banned is True:
             self.command = None

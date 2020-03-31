@@ -5,7 +5,7 @@ major.feature.patch-buildnumber
 * Major build numbers are always a breaking change, normally > 50% refactor.
 * Feature build numbers are never breaking and will result from adding new commands, or subtle changes like logging.
 * Patch build numbers are reserved for trivial changes like bugs or wording inside help docs. 
-* Build numbers only represent the amount of times Jenkins as attempted builds on the pipeline. 
+* Build numbers only represent the amount of times Jenkins has attempted builds on the pipeline. 
 
 ## Features:
 * Dynamically loads commands
@@ -29,7 +29,7 @@ also be done on initial launch.
 
 ### Testing:
 ```
-pytest -v
+pytest -v -cov=*
 ```
 
 ### Docker:
@@ -60,5 +60,5 @@ WantedBy=multi-user.target
 ```
 
 ### TODO:
-* create commands
+* fix crashing issue where asyncio will not terminate all workers properly.
 * generate some user instruction
