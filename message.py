@@ -38,7 +38,7 @@ class Message(object):
         self.admin = self.check_admin()
         self.banned = False
         self.channel = data.get('channel')
-        self.target_users = self.check_users()
+        self.target_users = []
         self.check_command()
         self.run_command()
 
@@ -65,8 +65,6 @@ class Message(object):
 
     def check_banned(self):
         """ Checks to see if the user is banned: returns boolean """
-        myworkdir = self._kwargs.get('myworkdir')
-        self.channel = self._data.get('channel')
         banned = self._kwargs.get('banned')
         if self.user in banned:
             _msg = "You are banned. "
@@ -105,14 +103,14 @@ class Message(object):
                         'message_deleted']
         if self._data.get('subtype') in ignore_types:
             self.command = False
+        elif not self._text:
+            self.command = False
         return
 
     def check_users(self):
         """ Grabs all of the user ids from the text: returns list """
         import re
         target_users = []
-        if not self._text:
-            return target_users
         reg = re.compile('<@.*>')
         for value in self._text.split(' '):
             if reg.match(value):
@@ -130,6 +128,7 @@ class Message(object):
         self.check_bot()
         self.check_message()
         if self.command:
+            self.target_users = self.check_users()
             if len(self.target_users) > 1:
                 self.run_multiuser_command()
                 return
