@@ -31,7 +31,16 @@ class FakeInternetPoints(object):
         self.change = self.process_command(self._command)
         self.msg = self.check_valid_user(self.message)
 
+    def check_upper_value(self, _change):
+        """ Hardcoded to only allow a change of 5 or -5 """
+        if _change < -5:
+            _change = -5
+        if _change > 5:
+            _change = 5
+        return _change
+
     def check_valid_user(self, message):
+        """ Validates a user isn't sending themselves points """
         if self.awarder in self._subjects:
             _msg = "<@{0}> You are not allowed to assign yourself points."
             msg = _msg.format(self.awarder)
@@ -54,32 +63,28 @@ class FakeInternetPoints(object):
                 _change -= 1
         return self.check_upper_value(_change)
 
-    def check_upper_value(self, _change):
-        """ Hardcoded to only allow a change of 5 or -5 """
-        if _change < -5:
-            _change = -5
-        if _change > 5:
-            _change = 5
-        return _change
+    def set_original_message(self):
+        """ Formats the message for the user """
+        _msg1 = "<@{0}> has changed by {1} "
+        _msg2 = ", now they have {2} in total.\n"
+        if self.change in [1, -1]:
+            _join = "point"
+        else:
+            _join = "points"
+        return "{0}{1}{2}".format(_msg1, _join, _msg2)
 
     def set_user_points(self, message):
         """ Adds users points to score dict """
         msg = ''
         score = message._kwargs.get('score')
-        for user in self.message.target_users:
-            _msg1 = "<@{0}> has changed by {1} "
-            _msg2 = ", now they have {2} in total.\n"
-            if user in score:
-                score[user] += self.change
-            else:
-                score[user] = self.change
-            if self.change == 0:
-                return msg
-            elif self.change in [1, -1]:
-                _msg = "{0}point{1}".format(_msg1, _msg2)
-            else:
-                _msg = "{0}points{1}".format(_msg1, _msg2)
-            msg += _msg.format(user,
-                               self.change,
-                               score[user])
+        if self.change == 0:
+            return msg
+        if user in score:
+            score[user] += self.change
+        else:
+            score[user] = self.change
+        msg = set_original_message().format(
+                user,
+                self.change,
+                score[user])
         return msg
