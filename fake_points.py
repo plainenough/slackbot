@@ -66,7 +66,7 @@ class FakeInternetPoints(object):
         """ Adds users points to score dict """
         msg = ''
         score = message._kwargs.get('score')
-        for user in message.target_users:
+        for user in self.message.target_users:
             _msg1 = "<@{0}> has changed by {1} "
             _msg2 = ", now they have {2} in total.\n"
             if user in score:
