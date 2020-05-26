@@ -86,7 +86,7 @@ class FakeInternetPoints(object):
         else:
             score[self.user] = self.change
         msg = self.set_original_message().format(
-                user,
+                self.user,
                 self.change,
                 score[self.user])
         return msg
