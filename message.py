@@ -1,5 +1,8 @@
+"""Simple message object."""
+
+
 class Message(object):
-    """ A message returned from the slack RTM Client
+    """A message returned from the slack RTM Client.
 
     Attributes:
     admin(bool): User admin status
@@ -29,6 +32,7 @@ class Message(object):
     """
 
     def __init__(self, data, **kwargs):
+        """Message initilization."""
         self._data = data
         self._kwargs = kwargs
         self._list_commands = self._kwargs.get('commands')
@@ -43,6 +47,7 @@ class Message(object):
         self.run_command()
 
     def __str__(self):
+        """Return a printout of the object."""
         value = "\nUSER:{0}\nTARGETS:{1}\n"
         value += "COMMAND:{2}\nORIGINAL_TEXT:{3}\n"
         value += "MSG:{4}\nADMIN:{5}\nBANNED:{6}"
@@ -57,14 +62,14 @@ class Message(object):
         return format_value
 
     def check_admin(self):
-        """ Checks to see if the user is an admin: returns boolean """
+        """Check to see if the user is an admin: returns boolean."""
         if self.user in self._kwargs.get('admins'):
             return True
         else:
             return False
 
     def check_banned(self):
-        """ Checks to see if the user is banned: returns boolean """
+        """Check to see if the user is banned: returns boolean."""
         banned = self._kwargs.get('banned')
         if self.user in banned:
             _msg = "You are banned. "
@@ -75,7 +80,7 @@ class Message(object):
         return
 
     def check_bot(self):
-        """ Checks if the message was sent from the bot user """
+        """Check if the message was sent from the bot user."""
         if self._data.get('bot_id'):
             if self._data.get('bot_id') == self._kwargs.get('botid'):
                 self.command = False
@@ -84,7 +89,7 @@ class Message(object):
         return
 
     def check_command(self):
-        """ Grabs the first command from text: intentially only one """
+        """Grab the first command from text: intentially only one."""
         self.command = False
         for value in self._text.split(' '):
             if str(value) in self._list_commands:
@@ -95,7 +100,7 @@ class Message(object):
         return
 
     def check_message(self):
-        """ Checks the message type againsts ignore list """
+        """Check the message type againsts ignore list."""
         ignore_types = ['message_changed',
                         'bot_message',
                         'message_deleted']
@@ -106,7 +111,7 @@ class Message(object):
         return
 
     def check_users(self):
-        """ Grabs all of the user ids from the text: returns list """
+        """Grab all of the user ids from the text: returns list."""
         import re
         target_users = []
         reg = re.compile('<@.*>')
@@ -122,7 +127,7 @@ class Message(object):
         return target_users
 
     def run_command(self):
-        """ Runs a single command targeted at a single user """
+        """Run a single command targeted at a single user."""
         self.check_bot()
         self.check_message()
         if self.command:
@@ -146,7 +151,7 @@ class Message(object):
             return
 
     def run_multiuser_command(self):
-        """ Runs a single command targeted at multiple users """
+        """Run a single command targeted at multiple users."""
         self.check_banned()
         if self.banned is True:
             self.command = None
@@ -159,7 +164,7 @@ class Message(object):
         return
 
     def run_fake_points(self, value):
-        """ This method incorporates the FakeInternetPoints class """
+        """Run FakeInternetPoints class."""
         from fake_points import FakeInternetPoints
         self.check_banned()
         if self.banned is True:
