@@ -8,6 +8,7 @@ class FakeInternetPoints(object):
         awarder(str): The initator for change in FakeInternetPoints
         change(int): The amount of information to be changed
         msg(str): The message posted by the bot
+        user(str): The user being executed on
 
         Methods:
         check_upper_value: Confirms an int isnt >5 or <-5
@@ -27,6 +28,7 @@ class FakeInternetPoints(object):
         self._kwargs = self.message._kwargs
         self._command = self.message._fipchange
         self._subjects = self.message.target_users
+        self.user = comargs.get('user')
         self.awarder = self.message.user
         self.change = self.process_command(self._command)
         self.msg = self.check_valid_user(self.message)
