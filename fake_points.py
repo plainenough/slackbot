@@ -22,13 +22,14 @@ class FakeInternetPoints(object):
         change.
         """
 
-    def __init__(self, message):
-        self._kwargs = message._kwargs
-        self._command = message._fipchange
-        self._subjects = message.target_users
-        self.awarder = message.user
+    def __init__(self, **comargs):
+        self.message = comargs.get('message')
+        self._kwargs = self.message._kwargs
+        self._command = self.message._fipchange
+        self._subjects = self.message.target_users
+        self.awarder = self.message.user
         self.change = self.process_command(self._command)
-        self.msg = self.check_valid_user(message)
+        self.msg = self.check_valid_user(self.message)
 
     def check_valid_user(self, message):
         if self.awarder in self._subjects:
