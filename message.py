@@ -161,7 +161,6 @@ class Message(object):
             return
         if len(self.target_users) == 1:
             user = self.target_users[0]
-        else:
             user = 'none'
             comargs = dict(user=user,
                            message=self,
