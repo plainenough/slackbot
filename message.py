@@ -16,6 +16,7 @@ class Message(object):
     check_bot: Checks to see if the bot user sent the message
     check_command: Checks for first command in text
     check_message: Check for blackisted message types
+    check_text: Check original message for text
     check_users: Checks for users in text
     run_command: Executes the command based on text input
     run_multiuser_command: Executes the command for multiple users
@@ -32,7 +33,7 @@ class Message(object):
         self._data = data
         self._kwargs = kwargs
         self._list_commands = self._kwargs.get('commands')
-        self._text = data.get('text')
+        self._text = self.check_text()
         self.user = data.get('user')
         self.msg = ''
         self.admin = self.check_admin()
@@ -104,6 +105,13 @@ class Message(object):
         elif not self._text:
             self.command = False
         return
+
+    def check_text(self):
+        """ Sets _text value """
+        if self._data.get('text'):
+            return self._data.get('text')
+        else:
+            return ' '
 
     def check_users(self):
         """ Grabs all of the user ids from the text: returns list """
