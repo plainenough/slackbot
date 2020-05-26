@@ -20,6 +20,7 @@ class Message(object):
     check_users: Checks for users in text
     run_command: Executes the command based on text input
     run_multiuser_command: Executes the command for multiple users
+    run_singleuser_command: Executes a command for 1 or less users
     run_fake_points: Executes fakepoint class
 
     Note:
@@ -102,8 +103,6 @@ class Message(object):
                         'message_deleted']
         if self._data.get('subtype') in ignore_types:
             self.command = False
-        elif not self._text:
-            self.command = False
         return
 
     def check_text(self):
@@ -139,19 +138,8 @@ class Message(object):
                 self.run_multiuser_command()
                 return
             else:
-                self.check_banned()
-                if self.banned is True:
-                    self.command = None
-                    return
-                if len(self.target_users) == 1:
-                    user = self.target_users[0]
-                else:
-                    user = 'none'
-                comargs = dict(user=user,
-                               message=self,
-                               workdir=self._kwargs.get('myworkdir'))
-                self.msg = self.command(**comargs)
-            return
+               self.run_singleuser_command()
+               return
 
     def run_multiuser_command(self):
         """ Runs a single command targeted at multiple users """
@@ -165,6 +153,21 @@ class Message(object):
                            workdir=self._kwargs.get('myworkdir'))
             self.msg += self.command(**comargs)
         return
+
+    def run_singleuser_command():
+        self.check_banned()
+        if self.banned is True:
+            self.command = None
+            return
+        if len(self.target_users) == 1:
+            user = self.target_users[0]
+        else:
+            user = 'none'
+            comargs = dict(user=user,
+                           message=self,
+                           workdir=self._kwargs.get('myworkdir'))
+            self.msg = self.command(**comargs)
+        return self.msg
 
     def run_fake_points(self, value):
         """ This method incorporates the FakeInternetPoints class """
