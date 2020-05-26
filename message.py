@@ -93,7 +93,8 @@ class Message(object):
                 self.command = self._list_commands.get(value)
                 return
             elif value.startswith('-') or value.startswith('+'):
-                self.run_fake_points(value)
+                self.command = self.run_fake_points
+                self._fipchange = value
         return
 
     def check_message(self):
@@ -159,22 +160,21 @@ class Message(object):
         if self.banned is True:
             self.command = None
             return
+        user = 'none'
         if len(self.target_users) == 1:
             user = self.target_users[0]
-            user = 'none'
-            comargs = dict(user=user,
-                           message=self,
-                           workdir=self._kwargs.get('myworkdir'))
-            self.msg = self.command(**comargs)
+        comargs = dict(user=user,
+                       message=self,
+                       workdir=self._kwargs.get('myworkdir'))
+        self.msg = self.command(**comargs)
         return
 
-    def run_fake_points(self, value):
+    def run_fake_points(self, **comargs):
         """ This method incorporates the FakeInternetPoints class """
         from fake_points import FakeInternetPoints
         self.check_banned()
         if self.banned is True:
             return self.msg
-        self._fipchange = value
         self.fip = FakeInternetPoints(self)
         self.msg = self.fip.msg
         return
