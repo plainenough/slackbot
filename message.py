@@ -167,7 +167,7 @@ class Message(object):
                            message=self,
                            workdir=self._kwargs.get('myworkdir'))
             self.msg = self.command(**comargs)
-        return self.msg
+        return
 
     def run_fake_points(self, value):
         """ This method incorporates the FakeInternetPoints class """
@@ -177,4 +177,5 @@ class Message(object):
             return self.msg
         self._fipchange = value
         self.fip = FakeInternetPoints(self)
-        return self.fip.msg
+        self.msg = self.fip.msg
+        return
