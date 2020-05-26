@@ -154,7 +154,7 @@ class Message(object):
             self.msg += self.command(**comargs)
         return
 
-    def run_singleuser_command():
+    def run_singleuser_command(self):
         self.check_banned()
         if self.banned is True:
             self.command = None
