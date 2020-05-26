@@ -177,4 +177,4 @@ class Message(object):
             return self.msg
         fip = FakeInternetPoints(**comargs)
         self.msg = fip.msg
-        return
+        return self.msg
