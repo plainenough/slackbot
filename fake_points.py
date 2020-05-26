@@ -81,7 +81,7 @@ class FakeInternetPoints(object):
         score = message._kwargs.get('score')
         if self.change == 0:
             return msg
-        if user in score:
+        if self.user in score:
             score[self.user] += self.change
         else:
             score[self.user] = self.change
