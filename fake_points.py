@@ -42,7 +42,7 @@ class FakeInternetPoints(object):
         """ Counts all of the values to generate a number """
         _change = 0
         count = 0
-        for value in message:
+        for value in self._command:
             if count == 0:
                 count += 1
                 #  skip the first record so it requires two ++ to get a point
