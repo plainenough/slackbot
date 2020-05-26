@@ -16,9 +16,11 @@ class Message(object):
     check_bot: Checks to see if the bot user sent the message
     check_command: Checks for first command in text
     check_message: Check for blackisted message types
+    check_text: Check original message for text
     check_users: Checks for users in text
     run_command: Executes the command based on text input
     run_multiuser_command: Executes the command for multiple users
+    run_singleuser_command: Executes a command for 1 or less users
     run_fake_points: Executes fakepoint class
 
     Note:
@@ -32,7 +34,7 @@ class Message(object):
         self._data = data
         self._kwargs = kwargs
         self._list_commands = self._kwargs.get('commands')
-        self._text = data.get('text')
+        self._text = self.check_text()
         self.user = data.get('user')
         self.msg = ''
         self.admin = self.check_admin()
@@ -91,7 +93,8 @@ class Message(object):
                 self.command = self._list_commands.get(value)
                 return
             elif value.startswith('-') or value.startswith('+'):
-                self.msg = self.run_fake_points(value)
+                self.command = self.run_fake_points
+                self._fipchange = value
         return
 
     def check_message(self):
@@ -101,9 +104,14 @@ class Message(object):
                         'message_deleted']
         if self._data.get('subtype') in ignore_types:
             self.command = False
-        elif not self._text:
-            self.command = False
         return
+
+    def check_text(self):
+        """ Sets _text value """
+        if self._data.get('text'):
+            return self._data.get('text')
+        else:
+            return ' '
 
     def check_users(self):
         """ Grabs all of the user ids from the text: returns list """
@@ -125,25 +133,14 @@ class Message(object):
         """ Runs a single command targeted at a single user """
         self.check_bot()
         self.check_message()
+        self.target_users = self.check_users()
         if self.command:
-            self.target_users = self.check_users()
             if len(self.target_users) > 1:
                 self.run_multiuser_command()
                 return
             else:
-                self.check_banned()
-                if self.banned is True:
-                    self.command = None
-                    return
-                if len(self.target_users) == 1:
-                    user = self.target_users[0]
-                else:
-                    user = 'none'
-                comargs = dict(user=user,
-                               message=self,
-                               workdir=self._kwargs.get('myworkdir'))
-                self.msg = self.command(**comargs)
-            return
+               self.run_singleuser_command()
+               return
 
     def run_multiuser_command(self):
         """ Runs a single command targeted at multiple users """
@@ -158,12 +155,26 @@ class Message(object):
             self.msg += self.command(**comargs)
         return
 
-    def run_fake_points(self, value):
+    def run_singleuser_command(self):
+        self.check_banned()
+        if self.banned is True:
+            self.command = None
+            return
+        user = 'none'
+        if len(self.target_users) == 1:
+            user = self.target_users[0]
+        comargs = dict(user=user,
+                       message=self,
+                       workdir=self._kwargs.get('myworkdir'))
+        self.msg = self.command(**comargs)
+        return
+
+    def run_fake_points(self, **comargs):
         """ This method incorporates the FakeInternetPoints class """
         from fake_points import FakeInternetPoints
         self.check_banned()
         if self.banned is True:
             return self.msg
-        self._fipchange = value
-        self.fip = FakeInternetPoints(self)
-        return self.fip.msg
+        fip = FakeInternetPoints(**comargs)
+        self.msg = fip.msg
+        return self.msg

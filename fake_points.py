@@ -22,13 +22,14 @@ class FakeInternetPoints(object):
         change.
         """
 
-    def __init__(self, message):
-        self._kwargs = message._kwargs
-        self._command = message._fipchange
-        self._subjects = message.target_users
-        self.awarder = message.user
+    def __init__(self, **comargs):
+        self.message = comargs.get('message')
+        self._kwargs = self.message._kwargs
+        self._command = self.message._fipchange
+        self._subjects = self.message.target_users
+        self.awarder = self.message.user
         self.change = self.process_command(self._command)
-        self.msg = self.check_valid_user(message)
+        self.msg = self.check_valid_user(self.message)
 
     def check_valid_user(self, message):
         if self.awarder in self._subjects:
@@ -42,7 +43,7 @@ class FakeInternetPoints(object):
         """ Counts all of the values to generate a number """
         _change = 0
         count = 0
-        for value in message:
+        for value in self._command:
             if count == 0:
                 count += 1
                 #  skip the first record so it requires two ++ to get a point
@@ -65,7 +66,7 @@ class FakeInternetPoints(object):
         """ Adds users points to score dict """
         msg = ''
         score = message._kwargs.get('score')
-        for user in message.target_users:
+        for user in self.message.target_users:
             _msg1 = "<@{0}> has changed by {1} "
             _msg2 = ", now they have {2} in total.\n"
             if user in score:
