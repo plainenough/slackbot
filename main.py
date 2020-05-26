@@ -75,12 +75,14 @@ async def check_for_runners(loop):
         if len(asyncio.Task.all_tasks(loop)) < 5:
             logging.error("A worker died. So should I. :(")
             tasks = []
-            for task in asyncio.all_tasks():
-                tasks.append(task)
-                if task == asyncio.current_task():
-                    continue
-                logging.error("Cancelling task {0}".format(task))
-                task.cancel()
+            #  Commenting below code because it doesn't work correctly.
+            #  On DNS failures the bot doesn't shutdown forcing a restart.
+            #  for task in asyncio.all_tasks():
+            #    tasks.append(task)
+            #    if task == asyncio.current_task():
+            #        continue
+            #    logging.error("Cancelling task {0}".format(task))
+            #    task.cancel()
             sys.exit(1)
         else:
             logging.debug("{0} Runners in loop.".format(
