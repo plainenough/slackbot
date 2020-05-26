@@ -82,11 +82,11 @@ class FakeInternetPoints(object):
         if self.change == 0:
             return msg
         if user in score:
-            score[user] += self.change
+            score[self.user] += self.change
         else:
-            score[user] = self.change
+            score[self.user] = self.change
         msg = set_original_message().format(
                 user,
                 self.change,
-                score[user])
+                score[self.user])
         return msg
