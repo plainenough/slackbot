@@ -132,8 +132,8 @@ class Message(object):
         """ Runs a single command targeted at a single user """
         self.check_bot()
         self.check_message()
+        self.target_users = self.check_users()
         if self.command:
-            self.target_users = self.check_users()
             if len(self.target_users) > 1:
                 self.run_multiuser_command()
                 return
