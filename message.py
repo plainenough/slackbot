@@ -175,6 +175,6 @@ class Message(object):
         self.check_banned()
         if self.banned is True:
             return self.msg
-        self.fip = FakeInternetPoints(**comargs)
-        self.msg = self.fip.msg
+        fip = FakeInternetPoints(**comargs)
+        self.msg = fip.msg
         return
