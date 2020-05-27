@@ -112,7 +112,7 @@ class Message(object):
         return
 
     def check_text(self):
-        """ Sets _text value """
+        """Set _text value."""
         if self._data.get('text'):
             return self._data.get('text')
         else:
@@ -161,6 +161,7 @@ class Message(object):
         return
 
     def run_singleuser_command(self):
+        """Run a single command targeted at a single user."""
         self.check_banned()
         if self.banned is True:
             self.command = None
@@ -175,7 +176,7 @@ class Message(object):
         return
 
     def run_fake_points(self, **comargs):
-        """ This method incorporates the FakeInternetPoints class """
+        """Run FakeInternetPoints class."""
         from fake_points import FakeInternetPoints
         self.check_banned()
         if self.banned is True:
