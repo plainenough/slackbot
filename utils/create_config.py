@@ -1,4 +1,6 @@
-#!/usr/bin/python3
+"""Create config if one doesn't exist."""
+
+
 import yaml
 
 TEMPLATE = '''\
@@ -12,12 +14,14 @@ TEMPLATE = '''\
 
 
 def create_config():
+    """Write template to disk."""
     with open('data/config.yaml', 'w') as config_file:
         for line in TEMPLATE:
             config_file.write(line)
 
 
 def main():
+    """Open or create config.yaml."""
     try: 
         with open('data/config.yaml', 'r') as config:
             yaml.load(config.read())
