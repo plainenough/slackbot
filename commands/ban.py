@@ -1,7 +1,8 @@
-#!/usr/bin/env python3
+"""Ban command utilities."""
 
 
 def alias():
+    """Define separate commands and map them to functions."""
     commands = dict(ban=ban_user,
                     unban=unban_user,
                     unbanall=unban_all)
@@ -9,7 +10,7 @@ def alias():
 
 
 def ban_user(**kwargs: dict) -> str:
-    """ban_user will ban a user from using commands"""
+    """Ban a user from using commands."""
     user = kwargs.get('user')
     message = kwargs.get('message')
     banned = message._kwargs.get('banned')
@@ -25,7 +26,7 @@ def ban_user(**kwargs: dict) -> str:
 
 
 def unban_all(**kwargs: dict) -> str:
-    """unban_all will unban all users"""
+    """Unban all users."""
     message = kwargs.get('message')
     banned = message._kwargs.get('banned')
     if message.admin:
@@ -38,7 +39,7 @@ def unban_all(**kwargs: dict) -> str:
 
 
 def unban_user(**kwargs: dict) -> str:
-    """unban_user will lift an existing user ban"""
+    """Unban an existing user ban."""
     user = kwargs.get('user')
     message = kwargs.get('message')
     banned = message._kwargs.get('banned')

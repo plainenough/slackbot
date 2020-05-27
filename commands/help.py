@@ -1,14 +1,14 @@
-#!/usr/bin/env python3
+"""Generate help message from docstrings."""
 
 
 def alias():
-    """ Custom commands and the functions they map too """
+    """Load custom commands and the functions they map too."""
     alias = dict(help=generate_help)
     return alias
 
 
 def generate_help(**kwargs):
-    """ Pulls the doc string out of all of the commands """
+    """Pull the doc string out of all of the commands."""
     message = kwargs.get('message')
     commands = message._list_commands
     if len(message._text) > 25:

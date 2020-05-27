@@ -1,8 +1,8 @@
-#!/usr/bin/env python3
+"""Fakeinternet ultilities."""
 
 
 def alias():
-    """ Custom commands and the functions they map too """
+    """Define separate commands and map them to functions."""
     alias = dict(
             mypoints=my_points,
             scoreboard=all_points,
@@ -11,7 +11,7 @@ def alias():
 
 
 def my_points(**kwargs: dict) -> str:
-    """ Get user FakeInternetPoints count for user """
+    """Get user FakeInternetPoints count for user."""
     user = kwargs.get('message').user
     score = kwargs.get('message')._kwargs.get('score')
     if user in score:
@@ -22,7 +22,7 @@ def my_points(**kwargs: dict) -> str:
 
 
 def all_points(**kwargs: dict) -> str:
-    """ Get a sorted list of fakeinternetpoints for team; requires admin """
+    """Get a sorted list of fakeinternetpoints for team; requires admin."""
     message = kwargs.get('message')
     score = message._kwargs.get('score')
     msg = ''
@@ -38,7 +38,7 @@ def all_points(**kwargs: dict) -> str:
 
 
 def reset_points(**kwargs: dict) -> str:
-    """ Resets scoreboard for entire team; requires admin """
+    """Reset scoreboard for entire team; requires admin."""
     score = kwargs.get('message')._kwargs.get('score')
     msg = ''
     if not kwargs['message'].admin:
