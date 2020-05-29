@@ -1,11 +1,14 @@
-#!/usr/bin/env python3
+"""Test tools around fake internet points."""
+
+
 import pytest
 
 
 class Message(object):
-    ''' Test class for command test '''
+    """Test class for command test."""
 
     def __init__(self):
+        """Initialize simple message object."""
         self._text = 'ban @<jan>'
         self.channel = '#general'
         self.user = 'bob'
@@ -16,6 +19,7 @@ class Message(object):
 
 @pytest.fixture
 def fixture_fiptools():
+    """Fixture for fiptools."""
     from commands import fake_internet_points
     message = Message()
     kwargs = dict(user='bob',
@@ -27,6 +31,7 @@ def fixture_fiptools():
 
 
 def test_alias():
+    """Test alias functionality."""
     from commands import fake_internet_points
     commands = fake_internet_points.alias()
     assert 'mypoints' in commands
@@ -35,12 +40,14 @@ def test_alias():
 
 
 def test_fipmypoints(fixture_fiptools):
+    """Test ability to list ones own points."""
     mypoints, allpoints = fixture_fiptools
     message = '<@bob> has 2 points'
     assert mypoints == message
 
 
 def test_fipallpoints(fixture_fiptools):
+    """Test display of all user points."""
     mypoints, allpoints = fixture_fiptools
     message = '<@bob> has a score of 2\n<@fred> has a score of 1\n'
     assert allpoints == message
