@@ -1,5 +1,6 @@
 """Template for new commands."""
 
+
 def alias():
     """Define separate commands and map them to functions."""
     #  This is a required portion of the commands to actually

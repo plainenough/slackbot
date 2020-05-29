@@ -22,19 +22,20 @@ def create_config():
 
 def main():
     """Open or create config.yaml."""
-    try: 
+    try:
         with open('data/config.yaml', 'r') as config:
             yaml.load(config.read())
             print("Config is valid yaml")
     except FileNotFoundError:
         print("Config doesn't exist: Creating config")
         create_config()
-    except yaml.scanner.ScannerError as e: 
+    except yaml.scanner.ScannerError as e:
         print(e)
         print("Config invalid check your config")
-    except: 
-        print("Unknown error: check permissions")
+    except Exception as e:
+        print("Unknown error: check permissions - {0}".format(e))
     return
+
 
 if __name__ == '__main__':
     main()

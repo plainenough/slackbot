@@ -24,7 +24,7 @@ def fixture_fip():
     message = Message()
     #  Writing an empty score file
     message._fipchange = "++"
-    comargs = dict(message=message,user=message.target_users[0])
+    comargs = dict(message=message, user=message.target_users[0])
     fip = fake_points.FakeInternetPoints(**comargs)
     return fip
 
@@ -38,7 +38,7 @@ def fixture_fip_self():
     score = {}
     message._fipchange = "++"
     message.target_users = ['bob']
-    comargs = dict(message=message,user=message.target_users[0])
+    comargs = dict(message=message, user=message.target_users[0])
     fip = fake_points.FakeInternetPoints(**comargs)
     return fip
 
@@ -51,7 +51,7 @@ def fixture_fip_negative():
     #  Writing an empty score file
     score = {}
     message._fipchange = "--"
-    comargs = dict(message=message,user=message.target_users[0])
+    comargs = dict(message=message, user=message.target_users[0])
     fip = fake_points.FakeInternetPoints(**comargs)
     return fip
 
@@ -64,7 +64,7 @@ def fixture_fip_gtv():
     #  Writing an empty score file
     score = {}
     message._fipchange = "+++++++++"
-    comargs = dict(message=message,user=message.target_users[0])
+    comargs = dict(message=message, user=message.target_users[0])
     pfip = fake_points.FakeInternetPoints(**comargs)
     message._fipchange = "-------"
     nfip = fake_points.FakeInternetPoints(**comargs)
