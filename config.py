@@ -1,5 +1,8 @@
-#!/usr/bin/env python3
+"""Load config from disk."""
+
+
 def obtain_config(logging):
+    """Import YAML based configs."""
     import yaml
     import sys
     try:

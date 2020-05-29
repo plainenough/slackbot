@@ -1,15 +1,15 @@
-#!/usr/bin/env python3
+"""Deliver definition from urbandictionary."""
 
 
 def alias():
-    """ Custom commands and the functions they map too """
+    """Define separate commands and map them to functions."""
     alias = dict(
             wtf_is=get_def)
     return alias
 
 
 def get_def(**kwargs: dict) -> str:
-    """ This will lookup the string following wtfis """
+    """Lookup the string following wtf_is."""
     message = kwargs.get('message')
     message.channel = message.user
     mytext = message._text
@@ -22,7 +22,7 @@ def get_def(**kwargs: dict) -> str:
 
 
 def check_ud(term):
-    """ This will lookup against urban dictionary """
+    """Lookup against urban dictionary API."""
     import requests
     results = []
     msg = ''

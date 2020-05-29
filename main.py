@@ -1,4 +1,6 @@
-#!/usr/bin/env python3
+"""Main function for slackbot."""
+
+
 import logging
 import sys
 import os
@@ -23,7 +25,9 @@ _mypath = os.path.abspath(__file__)
 config = obtain_config(logging)
 kwargs = {}
 
+
 def set_args():
+    """Set the default config/settings."""
     kwargs = dict(myworkdir=os.path.dirname(_mypath),
                   commands=discover_commands(logging),
                   slack_token=config.get('TOKEN'),
@@ -38,6 +42,7 @@ def set_args():
 
 @RTMClient.run_on(event="message")
 def catch_message(**payload):
+    """Slack provided example to retrieve a message from slack."""
     data, web_client = payload.get('data'), payload.get('web_client')
     logging.debug(data)
     message = Message(data, **kwargs)
@@ -50,6 +55,7 @@ def catch_message(**payload):
 
 
 def send_message(message, web_client):
+    """Return the processed message using the web client."""
     web_client.chat_postMessage(
         username=config.get('BOTNAME'),
         user=config.get('BOTUSERID'),
@@ -59,6 +65,7 @@ def send_message(message, web_client):
 
 
 async def save_to_disk(fname, data, **kwargs):
+    """Worker to save data to disk."""
     logging.debug("starting {0} worker".format(fname))
     while True:
         await asyncio.sleep(30)
@@ -70,19 +77,12 @@ async def save_to_disk(fname, data, **kwargs):
 
 
 async def check_for_runners(loop):
+    """Check if worker dies. If so, kill the process."""
     while True:
         await asyncio.sleep(10)
         if len(asyncio.Task.all_tasks(loop)) < 5:
             logging.error("A worker died. So should I. :(")
             tasks = []
-            #  Commenting below code because it doesn't work correctly.
-            #  On DNS failures the bot doesn't shutdown forcing a restart.
-            #  for task in asyncio.all_tasks():
-            #    tasks.append(task)
-            #    if task == asyncio.current_task():
-            #        continue
-            #    logging.error("Cancelling task {0}".format(task))
-            #    task.cancel()
             sys.exit(1)
         else:
             logging.debug("{0} Runners in loop.".format(
@@ -91,6 +91,7 @@ async def check_for_runners(loop):
 
 
 def pull_from_disk(fname):
+    """Retrive saved content off disk."""
     try:
         mwd = kwargs.get('myworkdir')
         myfile = open('{0}/data/{1}'.format(mwd, fname), 'rb')
@@ -105,6 +106,7 @@ def pull_from_disk(fname):
 
 
 async def run_client(**kwargs):
+    """Run slack RTM server."""
     logging.info("starting client")
     slack_token = config.get('TOKEN')
     rtm_client = RTMClient(token=slack_token)
@@ -113,6 +115,7 @@ async def run_client(**kwargs):
 
 
 def main():
+    """Execute setup and start the application."""
     loop = asyncio.get_event_loop()
     score = pull_from_disk('score')
     banned = pull_from_disk('banned')

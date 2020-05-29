@@ -1,29 +1,30 @@
-#!/usr/bin/env python3
+"""A simple class that constructs a points object."""
 
 
 class FakeInternetPoints(object):
-    """ A tracking system for fake internet points awarded
-        by users for users.
-        Atributes:
-        awarder(str): The initator for change in FakeInternetPoints
-        change(int): The amount of information to be changed
-        msg(str): The message posted by the bot
-        user(str): The user being executed on
+    """A tracking system for fake internet points awarded by users for users.
 
-        Methods:
-        check_upper_value: Confirms an int isnt >5 or <-5
-        check_valid_user: Verifies the user isn't giving themselves points
-        process_command: Counts the qualifiers in a command
-        set_user_points: Loads existing points and appends new values to dict
+    Atributes:
+    awarder(str): The initator for change in FakeInternetPoints
+    change(int): The amount of information to be changed
+    msg(str): The message posted by the bot
+    user(str): The user being executed on
 
-        Note:
-        Fake internet points are really the main goal here.
-        Under the hood we will really only be operating on
-        a dictionary that will be flushed to dish on every
-        change.
-        """
+    Methods:
+    check_upper_value: Confirms an int isnt >5 or <-5
+    check_valid_user: Verifies the user isn't giving themselves points
+    process_command: Counts the qualifiers in a command
+    set_user_points: Loads existing points and appends new values to dict
+
+    Note:
+    Fake internet points are really the main goal here.
+    Under the hood we will really only be operating on
+    a dictionary that will be flushed to dish on every
+    change.
+    """
 
     def __init__(self, **comargs):
+        """Set default values."""
         self.message = comargs.get('message')
         self._kwargs = self.message._kwargs
         self._command = self.message._fipchange
@@ -34,7 +35,7 @@ class FakeInternetPoints(object):
         self.msg = self.check_valid_user(self.message)
 
     def check_upper_value(self, _change):
-        """ Hardcoded to only allow a change of 5 or -5 """
+        """Hardcoded to only allow a change of 5 or -5."""
         if _change < -5:
             _change = -5
         if _change > 5:
@@ -42,7 +43,7 @@ class FakeInternetPoints(object):
         return _change
 
     def check_valid_user(self, message):
-        """ Validates a user isn't sending themselves points """
+        """Validate a user isn't sending themselves points."""
         if self.awarder in self._subjects:
             _msg = "<@{0}> You are not allowed to assign yourself points."
             msg = _msg.format(self.awarder)
@@ -51,7 +52,7 @@ class FakeInternetPoints(object):
         return msg
 
     def process_command(self, message):
-        """ Counts all of the values to generate a number """
+        """Count all of the values to generate a number."""
         _change = 0
         count = 0
         for value in self._command:
@@ -66,7 +67,7 @@ class FakeInternetPoints(object):
         return self.check_upper_value(_change)
 
     def set_original_message(self):
-        """ Formats the message for the user """
+        """Format the message for the user."""
         _msg1 = "<@{0}> has changed by {1} "
         _msg2 = ", now they have {2} in total.\n"
         if self.change in [1, -1]:
@@ -76,7 +77,7 @@ class FakeInternetPoints(object):
         return "{0}{1}{2}".format(_msg1, _join, _msg2)
 
     def set_user_points(self, message):
-        """ Adds users points to score dict """
+        """Add user's points to score dict."""
         msg = ''
         score = message._kwargs.get('score')
         if self.change == 0:

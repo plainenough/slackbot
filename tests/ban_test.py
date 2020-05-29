@@ -1,4 +1,6 @@
-#!/usr/bin/env python3
+"""Test ban functionality."""
+
+
 import pytest
 
 
@@ -6,9 +8,10 @@ banned = {'fred': True}
 
 
 class Message(object):
-    ''' Test class for command test '''
+    """Test class for command test."""
 
     def __init__(self):
+        """Initialize testing object."""
         self._text = 'ban @<jan>'
         self._kwargs = dict(banned=banned)
         self.channel = '#general'
@@ -18,6 +21,7 @@ class Message(object):
 
 @pytest.fixture
 def fixture_ban():
+    """Fixture to test ban user."""
     from commands import ban
     message = Message()
     kwargs = dict(user='jan',
@@ -29,6 +33,7 @@ def fixture_ban():
 
 @pytest.fixture
 def fixture_unban():
+    """Fixture to test unban user."""
     from commands import ban
     message = Message()
     kwargs = dict(user='fred',
@@ -40,6 +45,7 @@ def fixture_unban():
 
 @pytest.fixture
 def fixture_unbanall():
+    """Fixture to test unbanning all users."""
     from commands import ban
     message = Message()
     kwargs = dict(user='jan',
@@ -52,6 +58,7 @@ def fixture_unbanall():
 
 @pytest.fixture
 def fixture_notadmin():
+    """Fixture to test non-admin command run."""
     from commands import ban
     message = Message()
     message.admin = False
@@ -65,6 +72,7 @@ def fixture_notadmin():
 
 
 def test_alias():
+    """Test alias in commands.ban."""
     from commands import ban
     commands = ban.alias()
     assert 'ban' in commands
@@ -73,12 +81,14 @@ def test_alias():
 
 
 def test_unbanall(fixture_unbanall):
+    """Test unbanall functionality."""
     kwargs, unbanall, unbanned = fixture_unbanall
     assert unbanned == {}
     assert unbanall == 'Cleared the ban list'
 
 
 def test_ban(fixture_ban):
+    """Test ban functionality."""
     kwargs, ban = fixture_ban
     banned = kwargs.get('message')._kwargs.get('banned')
     assert banned.get('jan')
@@ -86,6 +96,7 @@ def test_ban(fixture_ban):
 
 
 def test_unban(fixture_unban):
+    """Test unban functionality."""
     kwargs, unban = fixture_unban
     banned = kwargs.get('message')._kwargs.get('banned')
     assert 'fred' not in banned
@@ -93,6 +104,7 @@ def test_unban(fixture_unban):
 
 
 def test_notadmin(fixture_notadmin):
+    """Test non-admin filtering functionality."""
     ban, unban, unbanall = fixture_notadmin
     message = '<@bob>, you are not an admin'
     assert ban == message

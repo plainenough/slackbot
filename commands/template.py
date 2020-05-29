@@ -1,8 +1,8 @@
-#!/usr/bin/env python3
+"""Template for new commands."""
 
 
 def alias():
-    """ Custom commands and the functions they map too """
+    """Define separate commands and map them to functions."""
     #  This is a required portion of the commands to actually
     #  load all of the variations and new methods. Your commands
     #  can leverage the message and kwargs object.
@@ -12,6 +12,6 @@ def alias():
 
 
 def my_command(**kwargs: dict) -> str:
-    """ A quick description of my_command """
+    """Describe my_command functionality."""
     msg = kwargs['message'].user
     return msg

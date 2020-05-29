@@ -1,11 +1,12 @@
-#!/usr/bin/env python3
+"""Load all commands in the commands directory."""
 
 
 def discover_commands(logging):
-    """ This function will discover files that exist in the CWD.
-        It will import those files and generate a dict with all
-        of the predefined command aliases for each command. This
-        will be templated and should be easy to understand.
+    """Discover files that exist in the commands directory.
+
+    It will import those files and generate a dict with all
+    of the predefined command aliases for each command. This
+    will be templated and should be easy to understand.
     """
     file_list = filter_list(logging)
     commands = {}
@@ -22,6 +23,7 @@ def discover_commands(logging):
 
 
 def check_alias(logging, _item, commands):
+    """Check imported commands for docstrings."""
     import importlib
     _aliases = {}
     _newcommand = importlib.import_module(_item)
@@ -38,6 +40,7 @@ def check_alias(logging, _item, commands):
 
 
 def filter_list(logging):
+    """Remove some files that don't need to be loaded into the slackbot."""
     import sys
     import os
     _mypath = os.path.abspath(__file__)

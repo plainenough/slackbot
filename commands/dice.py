@@ -1,13 +1,14 @@
-#!/usr/bin/env python3
+"""Dice utilities."""
 
 
 def alias():
+    """Define separate commands and map them to functions."""
     commands = dict(roll=roll)
     return commands
 
 
 def roll(**kwargs: dict) -> str:
-    """ rolls a dice: roll d20 """
+    """Roll a dice: roll d20."""
     message = kwargs.get('message')
     _commands = []
     for com in message._text.split():
@@ -18,7 +19,7 @@ def roll(**kwargs: dict) -> str:
 
 
 def generate_message(_commands):
-    """ Constructs the message for dice """
+    """Construct the message for dice roll."""
     import random
     msg = ''
     for com in _commands:
