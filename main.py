@@ -59,6 +59,7 @@ def send_message(message, web_client):
     web_client.chat_postMessage(
         username=config.get('BOTNAME'),
         user=config.get('BOTUSERID'),
+        icon_emoji=":{0}:".format(config.get('BOTNAME')),
         channel=message.channel,
         text=message.msg)
     return
