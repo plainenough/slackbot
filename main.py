@@ -25,6 +25,7 @@ _mypath = os.path.abspath(__file__)
 config = obtain_config(logging)
 kwargs = {}
 
+
 def set_args():
     """Set the default config/settings."""
     kwargs = dict(myworkdir=os.path.dirname(_mypath),

@@ -144,8 +144,8 @@ class Message(object):
                 self.run_multiuser_command()
                 return
             else:
-               self.run_singleuser_command()
-               return
+                self.run_singleuser_command()
+                return
 
     def run_multiuser_command(self):
         """Run a single command targeted at multiple users."""

@@ -1,5 +1,6 @@
 """A simple class that constructs a points object."""
 
+
 class FakeInternetPoints(object):
     """A tracking system for fake internet points awarded by users for users.
 

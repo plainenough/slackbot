@@ -1,5 +1,6 @@
 """Load config from disk."""
 
+
 def obtain_config(logging):
     """Import YAML based configs."""
     import yaml
