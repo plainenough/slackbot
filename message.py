@@ -181,7 +181,7 @@ class Message(object):
         self.check_banned()
         if self.banned is True:
             return self.msg
-        if self.target_users.len() > 1:
+        if len(self.target_users) > 1:
           return
         fip = FakeInternetPoints(**comargs)
         self.msg = fip.msg
