@@ -8,7 +8,7 @@ import pickle
 import threading
 import time
 import asyncio
-from slack import RTMClient
+from slack_sdk.rtm import RTMClient
 from commands import discover_commands
 from config import obtain_config
 from message import Message
@@ -41,7 +41,7 @@ def set_args():
 
 
 @RTMClient.run_on(event="message")
-def catch_message(**payload):
+async def catch_message(**payload):
     """Slack provided example to retrieve a message from slack."""
     data, web_client = payload.get('data'), payload.get('web_client')
     logging.debug(data)
@@ -84,7 +84,7 @@ async def check_for_runners(loop):
         if len(asyncio.Task.all_tasks(loop)) < 5:
             logging.error("A worker died. So should I. :(")
             tasks = []
-            sys.exit(1)
+            loop.stop()
         else:
             logging.debug("{0} Runners in loop.".format(
                 len(asyncio.Task.all_tasks(loop))))
@@ -106,12 +106,14 @@ def pull_from_disk(fname):
     return data
 
 
-async def run_client(**kwargs):
+async def run_client(loop, **kwargs):
     """Run slack RTM server."""
     logging.info("starting client")
     slack_token = config.get('TOKEN')
-    rtm_client = RTMClient(token=slack_token)
+    rtm_client = RTMClient(token=slack_token, loop=loop, run_async=True)
+    # rtm_client.loop = loop
     rtm_client.start()
+    logging.info("started client server")
     return
 
 
@@ -120,10 +122,11 @@ def main():
     loop = asyncio.get_event_loop()
     score = pull_from_disk('score')
     banned = pull_from_disk('banned')
-    asyncio.ensure_future(run_client(**kwargs))
+    asyncio.ensure_future(run_client(loop, **kwargs))
     asyncio.ensure_future(save_to_disk('score', score, **kwargs))
     asyncio.ensure_future(save_to_disk('banned', banned, **kwargs))
     asyncio.ensure_future(check_for_runners(loop))
+    logging.info("running loop forever")
     loop.run_forever()
     return
 

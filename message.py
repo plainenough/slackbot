@@ -122,7 +122,7 @@ class Message(object):
         """Grab all of the user ids from the text: returns list."""
         import re
         target_users = []
-        reg = re.compile('<@.*>')
+        reg = re.compile('\<@.*\>')
         for value in self._text.split(' '):
             if reg.match(value):
                 if value.strip('<>@') in target_users:
@@ -181,6 +181,8 @@ class Message(object):
         self.check_banned()
         if self.banned is True:
             return self.msg
+        if self.target_users.len() > 1:
+          return
         fip = FakeInternetPoints(**comargs)
         self.msg = fip.msg
         return self.msg
