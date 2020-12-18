@@ -31,6 +31,6 @@ def test_printout():
     from commands import help
     message = Message()
     kwargs = dict(message=message)
-    msg = '```mycmd                         : returns true```'
+    msg = '```mycmd                         : Return true.```'
     assert msg == help.generate_help(**kwargs)
     assert message.channel == "bob"

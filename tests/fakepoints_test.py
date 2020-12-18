@@ -30,6 +30,18 @@ def fixture_fip():
 
 
 @pytest.fixture
+def fixture_fip_null():
+    """Fixture for adding fake points."""
+    import fake_points
+    message = Message()
+    #  Writing an empty score file
+    message._fipchange = "++"
+    comargs = dict(message=message, user=None)
+    fip = fake_points.FakeInternetPoints(**comargs)
+    return fip
+
+
+@pytest.fixture
 def fixture_fip_self():
     """Fixture for adding points to self."""
     import fake_points
@@ -75,6 +87,12 @@ def test_awarder(fixture_fip):
     """Test target user."""
     fip = fixture_fip
     assert fip.awarder == 'bob'
+
+
+def test_user_null(fixture_fip_null):
+    """Test target user."""
+    fip = fixture_fip_null
+    assert fip.msg == ''
 
 
 def test_change(fixture_fip):
