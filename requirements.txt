@@ -1,4 +1,4 @@
-slackclient==2.5.0
+slackclient==2.9.3
 pyyaml
 pytest==5.3.5
 pytest_cov==2.5.1
