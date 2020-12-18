@@ -80,7 +80,7 @@ class FakeInternetPoints(object):
         """Add user's points to score dict."""
         msg = ''
         score = message._kwargs.get('score')
-        if self.change == 0:
+        if self.change == 0 or self.user = 'None':
             return msg
         if self.user in score:
             score[self.user] += self.change

@@ -41,7 +41,7 @@ def set_args():
 
 
 @RTMClient.run_on(event="message")
-def catch_message(**payload):
+async def catch_message(**payload):
     """Slack provided example to retrieve a message from slack."""
     data, web_client = payload.get('data'), payload.get('web_client')
     logging.debug(data)
