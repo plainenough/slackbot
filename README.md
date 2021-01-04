@@ -16,13 +16,13 @@ major.feature.patch-buildnumber
 
 ## Deployment instructions:
 Note: Use utils.create_config to generate a config template. This will
-also be done on initial launch. 
+also be done on initial launch.
 
 ### Requirements:
 * python 3.6 or higher
 * pip packages
   * pyyaml
-  * slackclient
+  * slack_sdk
   * pytest
 * docker
 * app setup with api key in existing slack install
@@ -59,6 +59,14 @@ ExecStart=/usr/bin/python3 /opt/slackbot/main.py
 WantedBy=multi-user.target
 ```
 
+### Instructions
+Commands are loaded on import and should contain the docstring from each
+command. Simply using the "help" command will trigger the bot to supply 
+the command and the docstring associated.
+
+You will need your bot ID and your general channel id. 
+
+/commands are not implemented.
+
 ### TODO:
-* fix crashing issue where asyncio will not terminate all workers properly.
-* generate some user instruction
+* generate better user instruction
