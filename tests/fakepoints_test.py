@@ -92,6 +92,7 @@ def test_awarder(fixture_fip):
 def test_user_null(fixture_fip_null):
     """Test target user."""
     fip = fixture_fip_null
+    assert fip.user is None
     assert fip.msg == ''
 
 
