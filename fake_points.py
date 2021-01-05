@@ -29,10 +29,17 @@ class FakeInternetPoints(object):
         self._kwargs = self.message._kwargs
         self._command = self.message._fipchange
         self._subjects = self.message.target_users
-        self.user = comargs.get('user')
+        self.user = self.check_none_user(comargs.get('user'))
         self.awarder = self.message.user
         self.change = self.process_command(self._command)
         self.msg = self.check_valid_user(self.message)
+
+    def check_none_user(self, user):
+        """Check for user is nonetype."""
+        if user == 'none' or user is None:
+            return None
+        else:
+            return user
 
     def check_upper_value(self, _change):
         """Hardcoded to only allow a change of 5 or -5."""
