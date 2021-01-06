@@ -6,6 +6,7 @@ def alias():
     alias = dict(
             mypoints=my_points,
             scoreboard=all_points,
+            deleteScore=del_points,
             resetScores=reset_points)
     return alias
 
@@ -45,4 +46,17 @@ def reset_points(**kwargs: dict) -> str:
         return msg
     score.clear()
     msg = "All scores have been reset"
+    return msg
+
+
+def del_points(**kwargs: dict) -> str:
+    """Delete all points record for a user; requires admin."""
+    user = kwargs.get('user')
+    score = kwargs.get('message')._kwargs.get('score')
+    msg = ''
+    if not kwargs['message'].admin:
+        return msg
+    if user in score:
+        del score[user]
+    msg = "<@{0}> has been removed from the scoreboard".format(user)
     return msg

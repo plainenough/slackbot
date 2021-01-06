@@ -30,6 +30,20 @@ def fixture_fiptools():
     return mypoints, allpoints
 
 
+@pytest.fixture
+def fixture_delpoints():
+    """Fixture for fiptools."""
+    from commands import fake_internet_points
+    message = Message()
+    message._text = 'deleteScore <@fred>'
+    kwargs = dict(user='fred',
+                  channel=message.channel,
+                  message=message)
+    mypoints = fake_internet_points.del_points(**kwargs)
+    score = message._kwargs
+    return mypoints, score
+
+
 def test_alias():
     """Test alias functionality."""
     from commands import fake_internet_points
@@ -51,3 +65,11 @@ def test_fipallpoints(fixture_fiptools):
     mypoints, allpoints = fixture_fiptools
     message = '<@bob> has a score of 2\n<@fred> has a score of 1\n'
     assert allpoints == message
+
+
+def test_fipdelpoints(fixture_delpoints):
+    """Test the ability for admin to delete user reference."""
+    mypoints, score = fixture_delpoints
+    message = '<@fred> has been removed from the scoreboard'
+    assert mypoints == message
+    assert score.get('score') == {'bob': 2}
