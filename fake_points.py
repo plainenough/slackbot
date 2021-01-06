@@ -11,7 +11,6 @@ class FakeInternetPoints(object):
     user(str): The user being executed on
 
     Methods:
-    check_none_user: Makes sure that a user isn't a nonetype or 'none'
     check_upper_value: Confirms an int isnt >5 or <-5
     check_valid_user: Verifies the user isn't giving themselves points
     process_command: Counts the qualifiers in a command
@@ -30,17 +29,11 @@ class FakeInternetPoints(object):
         self._kwargs = self.message._kwargs
         self._command = self.message._fipchange
         self._subjects = self.message.target_users
-        self.user = self.check_none_user(comargs.get('user'))
+        self.user = comargs.get('user')
         self.awarder = self.message.user
         self.change = self.process_command(self._command)
         self.msg = self.check_valid_user(self.message)
 
-    def check_none_user(self, user):
-        """Check for user is nonetype."""
-        if user == 'none' or user is None:
-            return None
-        else:
-            return user
 
     def check_upper_value(self, _change):
         """Hardcoded to only allow a change of 5 or -5."""
@@ -88,7 +81,7 @@ class FakeInternetPoints(object):
         """Add user's points to score dict."""
         msg = ''
         score = message._kwargs.get('score')
-        if self.change == 0 or self.user is None:
+        if self.change == 0:
             return msg
         if self.user in score:
             score[self.user] += self.change
