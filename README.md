@@ -29,7 +29,12 @@ also be done on initial launch.
 
 ### Testing:
 ```
-pytest -v -cov=*
+# Root directory of the repo.
+export PYTHONPATH=$PWD
+# To execut tests
+pytest -v
+# To see useful coverage map
+pytest -v --cov=commands --cov=fake_points --cov=message
 ```
 
 ### Docker:
@@ -69,4 +74,7 @@ You will need your bot ID and your general channel id.
 /commands are not implemented.
 
 ### TODO:
-* generate better user instruction
+* generate better user instructions
+* convert config to secondary option and retrieve config from environment variables
+* auto discover as much about the application as possible to reduce config
+* add assertions to testing
