@@ -165,8 +165,8 @@ class Message(object):
         self.check_banned()
         if self.banned is True:
             self.command = None
-            return
-        user = 'none'
+            return ''
+        user = None
         if len(self.target_users) == 1:
             user = self.target_users[0]
         comargs = dict(user=user,
@@ -182,7 +182,7 @@ class Message(object):
         if self.banned is True:
             return self.msg
         if len(self.target_users) > 1:
-            return
+            return ''
         fip = FakeInternetPoints(**comargs)
         self.msg = fip.msg
         return self.msg
