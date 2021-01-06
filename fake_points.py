@@ -34,7 +34,6 @@ class FakeInternetPoints(object):
         self.change = self.process_command(self._command)
         self.msg = self.check_valid_user(self.message)
 
-
     def check_upper_value(self, _change):
         """Hardcoded to only allow a change of 5 or -5."""
         if _change < -5:
