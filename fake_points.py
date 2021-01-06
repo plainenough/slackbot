@@ -11,6 +11,7 @@ class FakeInternetPoints(object):
     user(str): The user being executed on
 
     Methods:
+    check_none_user: Makes sure that a user isn't a nonetype or 'none'
     check_upper_value: Confirms an int isnt >5 or <-5
     check_valid_user: Verifies the user isn't giving themselves points
     process_command: Counts the qualifiers in a command
@@ -19,8 +20,8 @@ class FakeInternetPoints(object):
     Note:
     Fake internet points are really the main goal here.
     Under the hood we will really only be operating on
-    a dictionary that will be flushed to dish on every
-    change.
+    a dictionary that will be flushed to disk on a regular
+    interval.
     """
 
     def __init__(self, **comargs):
