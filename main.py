@@ -65,9 +65,9 @@ def send_message(message, web_client):
     return
 
 
-async def save_to_disk(fname, data, **kwargs):
+async def save_to_disk(fname, data):
     """Worker to save data to disk."""
-    logging.debug("starting {0} worker".format(fname))
+    logging.info("Starting {0} worker".format(fname))
     while True:
         await asyncio.sleep(30)
         mwd = kwargs.get('myworkdir')
@@ -94,6 +94,7 @@ async def check_for_runners(loop):
 def pull_from_disk(fname):
     """Retrive saved content off disk."""
     try:
+        logging.info("Loading {0} from disk".format(fname))
         mwd = kwargs.get('myworkdir')
         myfile = open('{0}/data/{1}'.format(mwd, fname), 'rb')
         data = pickle.load(myfile)
@@ -111,7 +112,6 @@ async def run_client(loop, **kwargs):
     logging.info("starting client")
     slack_token = config.get('TOKEN')
     rtm_client = RTMClient(token=slack_token, loop=loop, run_async=True)
-    # rtm_client.loop = loop
     rtm_client.start()
     logging.info("started client server")
     return
@@ -123,8 +123,8 @@ def main():
     score = pull_from_disk('score')
     banned = pull_from_disk('banned')
     asyncio.ensure_future(run_client(loop, **kwargs))
-    asyncio.ensure_future(save_to_disk('score', score, **kwargs))
-    asyncio.ensure_future(save_to_disk('banned', banned, **kwargs))
+    asyncio.ensure_future(save_to_disk('score', score))
+    asyncio.ensure_future(save_to_disk('banned', banned))
     asyncio.ensure_future(check_for_runners(loop))
     logging.info("running loop forever")
     loop.run_forever()
