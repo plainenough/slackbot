@@ -31,7 +31,7 @@ also be done on initial launch.
 ```
 # Root directory of the repo.
 export PYTHONPATH=$PWD
-# To execut tests
+# To execute tests
 pytest -v
 # To see useful coverage map
 pytest -v --cov=commands --cov=fake_points --cov=message
@@ -42,6 +42,9 @@ pytest -v --cov=commands --cov=fake_points --cov=message
 docker build -t slackbot -f container/Dockerfile .
 docker run -v /absolute/path/data:/opt/slackbot/data --name=slackbot
 ```
+
+This application exepects a config file in the mounted directory.
+
 
 ### Daemonized:
 * Target OS: Ubuntu 18 (Bionic)
