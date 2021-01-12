@@ -1,40 +1,46 @@
 """Main function for slackbot."""
 
 
+import asyncio
+from commands import discover_commands
 import logging
-import sys
+from message import Message
 import os
 import pickle
+import requests
+from slack_sdk.rtm import RTMClient
+import sys
 import threading
 import time
-import asyncio
-from slack_sdk.rtm import RTMClient
-from commands import discover_commands
-from config import obtain_config
-from message import Message
 
 score = {}
 banned = {}
 
-logging.basicConfig(level=logging.INFO,
+token = os.getenv('TOKEN')
+log_level = os.getenv('LOGLEVEL')
+
+logging.basicConfig(level=logging."{0}".format(log_level.upper()),
                     format='%(asctime)s %(name)-12s %(levelname)-8s' +
                     ' %(message)s',
                     datefmt='%m-%d %H:%M',
                     filename='data/slackbot.log')
 _mypath = os.path.abspath(__file__)
-config = obtain_config(logging)
 kwargs = {}
+
+def get_slack_users():
+    """Retrieve slack user list and other settings."""
+    HEADER = {"Authorization": "Bearer {0}".format(token)}
+    URL = "https://slack.com/api/users.list"
+    userlist = requests.post(URL, headers=HEADER)
+    return userlist.content
 
 
 def set_args():
     """Set the default config/settings."""
+    userlist = get_slack_users()
     kwargs = dict(myworkdir=os.path.dirname(_mypath),
+                  users=userlist,
                   commands=discover_commands(logging),
-                  slack_token=config.get('TOKEN'),
-                  botid=config.get('BOTID'),
-                  botuserid=config.get('BOTUSERID'),
-                  botname=config.get('BOTNAME'),
-                  admins=config.get('ADMINS'),
                   score=score,
                   banned=banned)
     return kwargs
@@ -110,8 +116,7 @@ def pull_from_disk(fname):
 async def run_client(loop, **kwargs):
     """Run slack RTM server."""
     logging.info("starting client")
-    slack_token = config.get('TOKEN')
-    rtm_client = RTMClient(token=slack_token, loop=loop, run_async=True)
+    rtm_client = RTMClient(token=token, loop=loop, run_async=True)
     rtm_client.start()
     logging.info("started client server")
     return
