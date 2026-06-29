@@ -2,10 +2,16 @@ BANNED
 config.yaml
 *pyc
 *swp
+.venv/
 venv
 **__pycache__
 *log
-data
+data/config.yaml
+data/score
+data/banned
+data/score.json
+data/banned.json
 .*cache*
 .coverage
+.pytest_cache/
 score

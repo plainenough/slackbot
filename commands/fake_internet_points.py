@@ -1,62 +1,63 @@
 """Fakeinternet ultilities."""
 
+from audit import record
+from context import get_context
+from scoreboard import format_leaderboard, load_snapshot, save_snapshot
+
 
 def alias():
     """Define separate commands and map them to functions."""
-    alias = dict(
-            mypoints=my_points,
-            scoreboard=all_points,
-            deleteScore=del_points,
-            resetScores=reset_points)
-    return alias
+    return {
+        "mypoints": my_points,
+        "scoreboard": all_points,
+        "deleteScore": del_points,
+        "resetScores": reset_points,
+    }
 
 
-def my_points(**kwargs: dict) -> str:
+def my_points(**kwargs):
     """Get user FakeInternetPoints count for user."""
-    user = kwargs.get('message').user
-    score = kwargs.get('message')._kwargs.get('score')
+    ctx = get_context(kwargs)
+    user = ctx.actor_id
+    score = ctx.score
     if user in score:
-        msg = '<@{0}> has {1} points'.format(user, score[user])
-    else:
-        msg = "<@{0}> doesn't have points".format(user)
-    return msg
+        return "<@{0}> has {1} points".format(user, score[user])
+    return "<@{0}> doesn't have points".format(user)
 
 
-def all_points(**kwargs: dict) -> str:
+def all_points(**kwargs):
     """Get a sorted list of fakeinternetpoints for team; requires admin."""
-    message = kwargs.get('message')
-    score = message._kwargs.get('score')
-    msg = ''
-    if not kwargs['message'].admin:
-        return msg
-    if score == {}:
-        msg = 'No one on your team has gained or lost any fake internet points'
-    sorted_score = sorted(score, key=score.__getitem__)
-    sorted_score.reverse()
-    for user in sorted_score:
-        msg += "<@{0}> has a score of {1}\n".format(user, score[user])
-    return msg
+    ctx = get_context(kwargs)
+    denied = ctx.access.require_admin(ctx)
+    if denied:
+        return denied
+    previous = load_snapshot(ctx.workdir)
+    message = format_leaderboard(ctx.score, previous)
+    save_snapshot(ctx.workdir, ctx.score)
+    record(ctx.workdir, ctx.actor_id, "scoreboard")
+    return message
 
 
-def reset_points(**kwargs: dict) -> str:
+def reset_points(**kwargs):
     """Reset scoreboard for entire team; requires admin."""
-    score = kwargs.get('message')._kwargs.get('score')
-    msg = ''
-    if not kwargs['message'].admin:
-        return msg
-    score.clear()
-    msg = "All scores have been reset"
-    return msg
+    ctx = get_context(kwargs)
+    denied = ctx.access.require_admin(ctx)
+    if denied:
+        return denied
+    ctx.score.clear()
+    save_snapshot(ctx.workdir, ctx.score)
+    record(ctx.workdir, ctx.actor_id, "reset_scores")
+    return "All scores have been reset"
 
 
-def del_points(**kwargs: dict) -> str:
+def del_points(**kwargs):
     """Delete all points record for a user; requires admin."""
-    user = kwargs.get('user')
-    score = kwargs.get('message')._kwargs.get('score')
-    msg = ''
-    if not kwargs['message'].admin:
-        return msg
-    if user in score:
-        del score[user]
-    msg = "<@{0}> has been removed from the scoreboard".format(user)
-    return msg
+    ctx = get_context(kwargs)
+    user = kwargs.get("user")
+    denied = ctx.access.require_admin(ctx)
+    if denied:
+        return denied
+    if user in ctx.score:
+        del ctx.score[user]
+    record(ctx.workdir, ctx.actor_id, "delete_score", target=user)
+    return "<@{0}> has been removed from the scoreboard".format(user)

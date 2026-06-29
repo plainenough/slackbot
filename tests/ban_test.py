@@ -1,112 +1,112 @@
 """Test ban functionality."""
 
-
 import pytest
 
+from access import AccessControl
+from context import CommandContext
+from commands import ban as ban_command
 
-banned = {'fred': True}
+banned = {"fred": True}
 
 
 class Message(object):
-    """Test class for command test."""
+    """Test stub with shared AccessControl state."""
 
-    def __init__(self):
-        """Initialize testing object."""
-        self._text = 'ban @<jan>'
+    def __init__(self, admins=None):
+        self._text = "ban @<jan>"
+        self.channel = "#general"
+        self.user = "bob"
+        admin_list = ["bob"] if admins is None else admins
         self._kwargs = dict(banned=banned)
-        self.channel = '#general'
-        self.user = 'bob'
-        self.admin = True
+        self.access = AccessControl(admin_list, banned)
+        self.context = CommandContext(
+            actor_id=self.user,
+            channel_id=self.channel,
+            text=self._text,
+            target_users=[],
+            access=self.access,
+            score={},
+            workdir="/tmp",
+            commands={},
+            reply_channel=self.channel,
+        )
+        self.admin = self.access.is_admin(self.user)
 
 
 @pytest.fixture
 def fixture_ban():
-    """Fixture to test ban user."""
-    from commands import ban
     message = Message()
-    kwargs = dict(user='jan',
-                  channel=message.channel,
-                  message=message)
-    ban = ban.ban_user(**kwargs)
-    return kwargs, ban
+    kwargs = dict(user="jan", channel=message.channel, message=message, context=message.context)
+    result = ban_command.ban_user(**kwargs)
+    return kwargs, result
 
 
 @pytest.fixture
 def fixture_unban():
-    """Fixture to test unban user."""
-    from commands import ban
     message = Message()
-    kwargs = dict(user='fred',
-                  channel=message.channel,
-                  message=message)
-    unban = ban.unban_user(**kwargs)
-    return kwargs, unban
+    kwargs = dict(user="fred", channel=message.channel, message=message, context=message.context)
+    result = ban_command.unban_user(**kwargs)
+    return kwargs, result
 
 
 @pytest.fixture
 def fixture_unbanall():
-    """Fixture to test unbanning all users."""
-    from commands import ban
     message = Message()
-    kwargs = dict(user='jan',
-                  channel=message.channel,
-                  message=message)
-    unbanall = ban.unban_all(**kwargs)
-    unbanned = message._kwargs.get('banned')
-    return kwargs, unbanall, unbanned
+    kwargs = dict(user="jan", channel=message.channel, message=message, context=message.context)
+    result = ban_command.unban_all(**kwargs)
+    return kwargs, result, banned
 
 
 @pytest.fixture
 def fixture_notadmin():
-    """Fixture to test non-admin command run."""
-    from commands import ban
-    message = Message()
-    message.admin = False
-    kwargs = dict(user='jan',
-                  channel=message.channel,
-                  message=message)
-    _ban = ban.ban_user(**kwargs)
-    unban = ban.unban_user(**kwargs)
-    unbanall = ban.unban_all(**kwargs)
-    return _ban, unban, unbanall
+    message = Message(admins=[])
+    message.context = CommandContext(
+        actor_id=message.user,
+        channel_id=message.channel,
+        text=message._text,
+        target_users=[],
+        access=message.access,
+        score={},
+        workdir="/tmp",
+        commands={},
+        reply_channel=message.channel,
+    )
+    kwargs = dict(user="jan", channel=message.channel, message=message, context=message.context)
+    return (
+        ban_command.ban_user(**kwargs),
+        ban_command.unban_user(**kwargs),
+        ban_command.unban_all(**kwargs),
+    )
 
 
 def test_alias():
-    """Test alias in commands.ban."""
-    from commands import ban
-    commands = ban.alias()
-    assert 'ban' in commands
-    assert 'unban' in commands
-    assert 'unbanall' in commands
+    commands = ban_command.alias()
+    assert "ban" in commands
+    assert "unban" in commands
+    assert "unbanall" in commands
 
 
 def test_unbanall(fixture_unbanall):
-    """Test unbanall functionality."""
-    kwargs, unbanall, unbanned = fixture_unbanall
+    kwargs, result, unbanned = fixture_unbanall
     assert unbanned == {}
-    assert unbanall == 'Cleared the ban list'
+    assert result == "Cleared the ban list"
 
 
 def test_ban(fixture_ban):
-    """Test ban functionality."""
-    kwargs, ban = fixture_ban
-    banned = kwargs.get('message')._kwargs.get('banned')
-    assert banned.get('jan')
-    assert ban == 'User <@jan> is banned.\n'
+    kwargs, result = fixture_ban
+    assert kwargs["message"].access.is_banned("jan")
+    assert result == "User <@jan> is banned.\n"
 
 
 def test_unban(fixture_unban):
-    """Test unban functionality."""
-    kwargs, unban = fixture_unban
-    banned = kwargs.get('message')._kwargs.get('banned')
-    assert 'fred' not in banned
-    assert unban == 'User <@fred> is unbanned.\n'
+    kwargs, result = fixture_unban
+    assert not kwargs["message"].access.is_banned("fred")
+    assert result == "User <@fred> is unbanned.\n"
 
 
 def test_notadmin(fixture_notadmin):
-    """Test non-admin filtering functionality."""
-    ban, unban, unbanall = fixture_notadmin
-    message = '<@bob>, you are not an admin'
-    assert ban == message
-    assert unban == message
-    assert unbanall == message
+    ban_result, unban_result, unbanall_result = fixture_notadmin
+    message = "<@bob>, you are not an admin"
+    assert ban_result == message
+    assert unban_result == message
+    assert unbanall_result == message

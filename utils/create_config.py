@@ -1,41 +1,39 @@
 """Create config if one doesn't exist."""
 
+import os
 
 import yaml
 
-TEMPLATE = '''\
-'TOKEN': False
-'BOTID': 'someid'
-'BOTUSERID': 'someid'
-'BOTNAME': 'slackbot'
-'ADMINS':
-  - 'UEMN5QPLM'
-'''
+DEFAULT_CONFIG = {
+    "BOTNAME": "slackbot",
+    "BOTID": "B00000000",
+    "BOTUSERID": "U00000000",
+    "BOT_TOKEN": "xoxb-your-bot-token",
+    "APP_TOKEN": "xapp-your-app-level-token",
+    "ADMINS": ["U00000000"],
+}
 
 
-def create_config():
-    """Write template to disk."""
-    with open('data/config.yaml', 'w') as config_file:
-        for line in TEMPLATE:
-            config_file.write(line)
+def create_config(path="data/config.yaml"):
+    """Write a starter config template to disk."""
+    os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
+    with open(path, "w", encoding="utf-8") as config_file:
+        yaml.safe_dump(DEFAULT_CONFIG, config_file, sort_keys=False)
 
 
 def main():
-    """Open or create config.yaml."""
+    path = os.environ.get("SLACKBOT_CONFIG", "data/config.yaml")
     try:
-        with open('data/config.yaml', 'r') as config:
-            yaml.load(config.read())
-            print("Config is valid yaml")
+        with open(path, "r", encoding="utf-8") as handle:
+            yaml.safe_load(handle)
+        print("Config is valid YAML")
     except FileNotFoundError:
-        print("Config doesn't exist: Creating config")
-        create_config()
-    except yaml.scanner.ScannerError as e:
-        print(e)
-        print("Config invalid check your config")
-    except Exception as e:
-        print("Unknown error: check permissions - {0}".format(e))
-    return
+        print("Config doesn't exist: creating template")
+        create_config(path)
+    except yaml.YAMLError as exc:
+        print(exc)
+        print("Config invalid; check your config")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

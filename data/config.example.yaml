@@ -1,0 +1,7 @@
+BOTNAME: slackbot
+BOTID: B00000000
+BOTUSERID: U00000000
+BOT_TOKEN: xoxb-your-bot-token
+APP_TOKEN: xapp-your-app-level-token
+ADMINS:
+  - U00000000

@@ -1,136 +1,156 @@
-"""Main function for slackbot."""
+#!/usr/bin/env python3
+"""Main entry point for slackbot (Socket Mode)."""
 
+from __future__ import annotations
 
 import logging
-import sys
 import os
-import pickle
+import signal
+import sys
 import threading
 import time
-import asyncio
-from slack_sdk.rtm import RTMClient
+from typing import Any, Dict
+
+from slack_sdk import WebClient
+from slack_sdk.socket_mode import SocketModeClient
+from slack_sdk.socket_mode.request import SocketModeRequest
+from slack_sdk.socket_mode.response import SocketModeResponse
+
+from access import AccessControl
+from bot_state import BotState
 from commands import discover_commands
 from config import obtain_config
+from dispatcher import CommandDispatcher
 from message import Message
+from message_parser import MessageParser
+from response import BotResponse
+from storage import load_state, save_state, start_save_worker
 
-score = {}
-banned = {}
-
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s %(name)-12s %(levelname)-8s' +
-                    ' %(message)s',
-                    datefmt='%m-%d %H:%M',
-                    filename='data/slackbot.log')
-_mypath = os.path.abspath(__file__)
-config = obtain_config(logging)
-kwargs = {}
+WORK_DIR = os.path.dirname(os.path.abspath(__file__))
+STOP_EVENT = threading.Event()
 
 
-def set_args():
-    """Set the default config/settings."""
-    kwargs = dict(myworkdir=os.path.dirname(_mypath),
-                  commands=discover_commands(logging),
-                  slack_token=config.get('TOKEN'),
-                  botid=config.get('BOTID'),
-                  botuserid=config.get('BOTUSERID'),
-                  botname=config.get('BOTNAME'),
-                  admins=config.get('ADMINS'),
-                  score=score,
-                  banned=banned)
-    return kwargs
+def configure_logging(workdir: str) -> None:
+    os.makedirs(os.path.join(workdir, "data"), exist_ok=True)
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s %(name)-12s %(levelname)-8s %(message)s",
+        datefmt="%m-%d %H:%M",
+        handlers=[
+            logging.FileHandler(os.path.join(workdir, "data", "slackbot.log")),
+            logging.StreamHandler(sys.stdout),
+        ],
+    )
 
 
-@RTMClient.run_on(event="message")
-async def catch_message(**payload):
-    """Slack provided example to retrieve a message from slack."""
-    data, web_client = payload.get('data'), payload.get('web_client')
-    logging.debug(data)
-    message = Message(data, **kwargs)
-    logging.debug(message)
-    if message.msg == '':
-        logging.debug("Empty message: skip processing, nothing to return")
+def build_kwargs(config: dict) -> Dict[str, Any]:
+    score, banned = load_state(WORK_DIR)
+    admins = config.get("ADMINS", [])
+    access = AccessControl(admins, banned)
+    return {
+        "myworkdir": WORK_DIR,
+        "commands": discover_commands(logging),
+        "slack_token": config.get("BOT_TOKEN"),
+        "botid": config.get("BOTID"),
+        "botuserid": config.get("BOTUSERID"),
+        "botname": config.get("BOTNAME", "slackbot"),
+        "admins": admins,
+        "access": access,
+        "score": score,
+        "banned": banned,
+    }
+
+
+def post_response(response: BotResponse, web_client: WebClient, config: dict) -> None:
+    if response.empty:
         return
-    send_message(message, web_client)
-    return
-
-
-def send_message(message, web_client):
-    """Return the processed message using the web client."""
+    channel = response.channel
+    if response.ephemeral and response.user:
+        channel = response.user
     web_client.chat_postMessage(
-        username=config.get('BOTNAME'),
-        user=config.get('BOTUSERID'),
-        icon_emoji=":{0}:".format(config.get('BOTNAME')),
-        channel=message.channel,
-        text=message.msg)
-    return
+        channel=channel,
+        text=response.text,
+        username=config.get("BOTNAME", "slackbot"),
+        icon_emoji=":{0}:".format(config.get("BOTNAME", "slackbot")),
+    )
 
 
-async def save_to_disk(fname, data):
-    """Worker to save data to disk."""
-    logging.info("Starting {0} worker".format(fname))
-    while True:
-        await asyncio.sleep(30)
-        mwd = kwargs.get('myworkdir')
-        myfile = open('{0}/data/{1}'.format(mwd, fname), 'wb')
-        pickle.dump(data, myfile)
-        myfile.close()
-    return
+def handle_message_event(event: dict, web_client: WebClient, config: dict, kwargs: dict) -> None:
+    message = Message(event, **kwargs)
+    if not message.msg:
+        logging.debug("Empty response; skipping post")
+        return
+    post_response(
+        BotResponse(message.msg, message.channel, ephemeral=message.ephemeral),
+        web_client,
+        config,
+    )
 
 
-async def check_for_runners(loop):
-    """Check if worker dies. If so, kill the process."""
-    while True:
-        await asyncio.sleep(10)
-        if len(asyncio.Task.all_tasks(loop)) < 5:
-            logging.error("A worker died. So should I. :(")
-            tasks = []
-            loop.stop()
-        else:
-            logging.debug("{0} Runners in loop.".format(
-                len(asyncio.Task.all_tasks(loop))))
-    return
+def handle_slash_command(payload: dict, web_client: WebClient, config: dict, kwargs: dict) -> None:
+    state = BotState.from_kwargs(kwargs)
+    parsed = MessageParser.parse_slash(payload, state)
+    response = CommandDispatcher(state).dispatch(parsed)
+    post_response(response, web_client, config)
 
 
-def pull_from_disk(fname):
-    """Retrive saved content off disk."""
+def process_socket_request(
+    req: SocketModeRequest,
+    web_client: WebClient,
+    config: dict,
+    kwargs: dict,
+) -> None:
+    if req.type == "events_api":
+        event = req.payload.get("event", {})
+        if event.get("type") == "message":
+            handle_message_event(event, web_client, config, kwargs)
+    elif req.type == "slash_commands":
+        handle_slash_command(req.payload, web_client, config, kwargs)
+
+
+def main() -> None:
+    configure_logging(WORK_DIR)
+    config = obtain_config(logging)
+    kwargs = build_kwargs(config)
+
+    web_client = WebClient(token=config.get("BOT_TOKEN"))
+    socket_client = SocketModeClient(
+        app_token=config.get("APP_TOKEN"),
+        web_client=web_client,
+    )
+
+    start_save_worker(WORK_DIR, kwargs["score"], kwargs["banned"], STOP_EVENT)
+
+    def process(client: SocketModeClient, req: SocketModeRequest) -> None:
+        try:
+            process_socket_request(req, web_client, config, kwargs)
+        except Exception:
+            logging.exception("Failed to process socket mode request")
+        finally:
+            client.send_socket_mode_response(
+                SocketModeResponse(envelope_id=req.envelope_id)
+            )
+
+    socket_client.socket_mode_request_listeners.append(process)
+
+    def shutdown(_signum, _frame) -> None:
+        logging.info("Shutting down slackbot")
+        STOP_EVENT.set()
+        socket_client.close()
+
+    signal.signal(signal.SIGINT, shutdown)
+    signal.signal(signal.SIGTERM, shutdown)
+
+    logging.info("Connecting to Slack via Socket Mode")
+    socket_client.connect()
     try:
-        logging.info("Loading {0} from disk".format(fname))
-        mwd = kwargs.get('myworkdir')
-        myfile = open('{0}/data/{1}'.format(mwd, fname), 'rb')
-        data = pickle.load(myfile)
-        kwargs[fname] = data
-        myfile.close()
-    except Exception as error:
-        text = "Failed to load filename: {0} --- {1}"
-        logging.debug(text.format(fname, error))
-        data = {}
-    return data
+        while not STOP_EVENT.is_set():
+            time.sleep(1)
+    finally:
+        save_state(WORK_DIR, kwargs["score"], kwargs["banned"])
+        socket_client.disconnect()
+        logging.info("Shutdown complete")
 
 
-async def run_client(loop, **kwargs):
-    """Run slack RTM server."""
-    logging.info("starting client")
-    slack_token = config.get('TOKEN')
-    rtm_client = RTMClient(token=slack_token, loop=loop, run_async=True)
-    rtm_client.start()
-    logging.info("started client server")
-    return
-
-
-def main():
-    """Execute setup and start the application."""
-    loop = asyncio.get_event_loop()
-    score = pull_from_disk('score')
-    banned = pull_from_disk('banned')
-    asyncio.ensure_future(run_client(loop, **kwargs))
-    asyncio.ensure_future(save_to_disk('score', score))
-    asyncio.ensure_future(save_to_disk('banned', banned))
-    asyncio.ensure_future(check_for_runners(loop))
-    logging.info("running loop forever")
-    loop.run_forever()
-    return
-
-
-if __name__ == '__main__':
-    kwargs = set_args()
+if __name__ == "__main__":
     main()
