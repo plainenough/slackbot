@@ -1,189 +1,140 @@
 """Simple message object."""
 
+import re
+
 
 class Message(object):
-    """A message returned from the slack RTM Client.
-
-    Attributes:
-    admin(bool): User admin status
-    banned(bool): User ban status
-    channel(str): A channel ID from slack
-    commands(str): First command from text, Defaults to empty value
-    msg(str): The formatted message to return to the client
-    user(str): This is the user who sent the message
-    target_users(list): Obtain user ids for target users from text
-
-    Methods:
-    check_admin: Checks if user is an admin
-    check_banned: Checks if the user is banned
-    check_bot: Checks to see if the bot user sent the message
-    check_command: Checks for first command in text
-    check_message: Check for blackisted message types
-    check_text: Check original message for text
-    check_users: Checks for users in text
-    run_command: Executes the command based on text input
-    run_multiuser_command: Executes the command for multiple users
-    run_singleuser_command: Executes a command for 1 or less users
-    run_fake_points: Executes fakepoint class
-
-    Note:
-    This just creates a message object based on the returned payload from
-    slack. I expect overloading the msg attribute will ultimately be the
-    correct way to set a value there. I only intend on tageting the first
-    command in an individual post.
-    """
+    """Parse a Slack message event and dispatch the first matching command."""
 
     def __init__(self, data, **kwargs):
-        """Message initilization."""
         self._data = data
         self._kwargs = kwargs
-        self._list_commands = self._kwargs.get('commands')
-        self._text = self.check_text()
-        self.user = data.get('user')
-        self.msg = ''
-        self.admin = self.check_admin()
+        self._list_commands = self._kwargs.get("commands", {})
+        self._text = self._parse_text()
+        self.user = data.get("user")
+        self.msg = ""
         self.banned = False
-        self.channel = data.get('channel')
+        self.channel = data.get("channel")
         self.target_users = []
-        self.check_command()
-        self.run_command()
+        self.command = False
+        self._resolve_command()
+        self._dispatch()
 
     def __str__(self):
-        """Return a printout of the object."""
         value = "\nUSER:{0}\nTARGETS:{1}\n"
         value += "COMMAND:{2}\nORIGINAL_TEXT:{3}\n"
         value += "MSG:{4}\nADMIN:{5}\nBANNED:{6}"
-        format_value = value.format(
-                self.user,
-                self.target_users,
-                self.command,
-                self._text,
-                self.msg,
-                self.admin,
-                self.banned)
-        return format_value
+        return value.format(
+            self.user,
+            self.target_users,
+            self.command,
+            self._text,
+            self.msg,
+            self.admin,
+            self.banned,
+        )
 
-    def check_admin(self):
-        """Check to see if the user is an admin: returns boolean."""
-        if self.user in self._kwargs.get('admins'):
-            return True
-        else:
-            return False
+    @property
+    def access(self):
+        return self._get_access()
 
-    def check_banned(self):
-        """Check to see if the user is banned: returns boolean."""
-        banned = self._kwargs.get('banned')
-        if self.user in banned:
-            _msg = "You are banned. "
-            _msg += "Please contact an admin."
-            self.msg = _msg
-            self.channel = self.user
-            self.banned = True
-        return
+    @property
+    def admin(self):
+        return self.access.is_admin(self.user)
 
-    def check_bot(self):
-        """Check if the message was sent from the bot user."""
-        bot_id = self._kwargs.get("botid")
-        bot_user_id = self._kwargs.get("botuserid")
-        if self._data.get("bot_id") and self._data.get("bot_id") == bot_id:
-            self.command = False
-        elif self.user and (self.user == bot_user_id or self.user == bot_id):
-            self.command = False
-        return
+    def _get_access(self):
+        access = self._kwargs.get("access")
+        if access is None:
+            from access import AccessControl
 
-    def check_command(self):
-        """Grab the first command from text: intentially only one."""
-        self.command = False
-        for value in self._text.split(' '):
+            access = AccessControl(
+                self._kwargs.get("admins", []),
+                self._kwargs.get("banned", {}),
+            )
+            self._kwargs["access"] = access
+        return access
+
+    def _parse_text(self):
+        if self._data.get("text"):
+            return self._data.get("text")
+        return " "
+
+    def _resolve_command(self):
+        for value in self._text.split(" "):
             if str(value) in self._list_commands:
                 self.command = self._list_commands.get(value)
                 return
-            elif value.startswith('-') or value.startswith('+'):
-                self.command = self.run_fake_points
+            if value.startswith("-") or value.startswith("+"):
+                self.command = self._run_fake_points
                 self._fipchange = value
-        return
+                return
 
-    def check_message(self):
-        """Check the message type againsts ignore list."""
-        ignore_types = ['message_changed',
-                        'bot_message',
-                        'message_deleted']
-        if self._data.get('subtype') in ignore_types:
-            self.command = False
-        return
+    def _should_ignore(self):
+        if self._is_bot_message():
+            return True
+        ignore_types = ["message_changed", "bot_message", "message_deleted"]
+        return self._data.get("subtype") in ignore_types
 
-    def check_text(self):
-        """Set _text value."""
-        if self._data.get('text'):
-            return self._data.get('text')
-        else:
-            return ' '
+    def _is_bot_message(self):
+        bot_id = self._kwargs.get("botid")
+        bot_user_id = self._kwargs.get("botuserid")
+        if self._data.get("bot_id") and self._data.get("bot_id") == bot_id:
+            return True
+        if self.user and (self.user == bot_user_id or self.user == bot_id):
+            return True
+        return False
 
-    def check_users(self):
-        """Grab all of the user ids from the text: returns list."""
-        import re
+    def _parse_target_users(self):
         target_users = []
-        reg = re.compile('<@.*>')
-        for value in self._text.split(' '):
-            if reg.match(value):
-                if value.strip('<>@') in target_users:
-                    #  This little gem is to prevent multiple entries for
-                    #  a user in the list inspired by Dylan
-                    continue
-                elif value.strip('<>@') == self._kwargs.get('botid'):
-                    continue
-                target_users.append(value.strip('<>@'))
+        mention = re.compile("<@.*>")
+        for value in self._text.split(" "):
+            if not mention.match(value):
+                continue
+            user_id = value.strip("<>@")
+            if user_id in target_users:
+                continue
+            if user_id == self._kwargs.get("botid"):
+                continue
+            target_users.append(user_id)
         return target_users
 
-    def run_command(self):
-        """Run a single command targeted at a single user."""
-        self.check_bot()
-        self.check_message()
-        self.target_users = self.check_users()
-        if self.command:
-            if len(self.target_users) > 1:
-                self.run_multiuser_command()
-                return
-            else:
-                self.run_singleuser_command()
-                return
+    def _dispatch(self):
+        if self._should_ignore():
+            self.command = False
+            return
+        if not self.command:
+            return
 
-    def run_multiuser_command(self):
-        """Run a single command targeted at multiple users."""
-        self.check_banned()
-        if self.banned is True:
+        self.target_users = self._parse_target_users()
+        if self.access.block_if_banned(self):
             self.command = None
             return
-        for _user in self.target_users:
-            comargs = dict(user=_user,
-                           message=self,
-                           workdir=self._kwargs.get('myworkdir'))
-            self.msg += self.command(**comargs)
-        return
 
-    def run_singleuser_command(self):
-        """Run a single command targeted at a single user."""
-        self.check_banned()
-        if self.banned is True:
-            self.command = None
-            return ''
-        user = None
-        if len(self.target_users) == 1:
-            user = self.target_users[0]
-        comargs = dict(user=user,
-                       message=self,
-                       workdir=self._kwargs.get('myworkdir'))
-        self.msg = self.command(**comargs)
-        return
-
-    def run_fake_points(self, **comargs):
-        """Run FakeInternetPoints class."""
-        from fake_points import FakeInternetPoints
-        self.check_banned()
-        if self.banned is True:
-            return self.msg
         if len(self.target_users) > 1:
-            return ''
+            self._run_multiuser_command()
+            return
+        self._run_singleuser_command()
+
+    def _command_args(self, user=None):
+        return {
+            "user": user,
+            "message": self,
+            "workdir": self._kwargs.get("myworkdir"),
+        }
+
+    def _run_multiuser_command(self):
+        for target_user in self.target_users:
+            self.msg += self.command(**self._command_args(user=target_user))
+
+    def _run_singleuser_command(self):
+        user = self.target_users[0] if len(self.target_users) == 1 else None
+        self.msg = self.command(**self._command_args(user=user))
+
+    def _run_fake_points(self, **comargs):
+        from fake_points import FakeInternetPoints
+
+        if len(self.target_users) > 1:
+            return ""
         fip = FakeInternetPoints(**comargs)
         self.msg = fip.msg
         return self.msg

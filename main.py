@@ -13,6 +13,7 @@ from slack_sdk.socket_mode import SocketModeClient
 from slack_sdk.socket_mode.request import SocketModeRequest
 from slack_sdk.socket_mode.response import SocketModeResponse
 
+from access import AccessControl
 from commands import discover_commands
 from config import obtain_config
 from message import Message
@@ -37,6 +38,8 @@ def configure_logging(workdir):
 
 def build_kwargs(config):
     score, banned = load_state(WORK_DIR)
+    admins = config.get("ADMINS", [])
+    access = AccessControl(admins, banned)
     return {
         "myworkdir": WORK_DIR,
         "commands": discover_commands(logging),
@@ -44,7 +47,8 @@ def build_kwargs(config):
         "botid": config.get("BOTID"),
         "botuserid": config.get("BOTUSERID"),
         "botname": config.get("BOTNAME", "slackbot"),
-        "admins": config.get("ADMINS", []),
+        "admins": admins,
+        "access": access,
         "score": score,
         "banned": banned,
     }

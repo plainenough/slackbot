@@ -15,6 +15,7 @@ Modernized Slack bot using **Socket Mode** (RTM is deprecated). Same commands, f
 - Admin ban / unban system
 - Socket Mode (no public URL required)
 - JSON persistence with pickle migration
+- Centralized admin/ban checks via `AccessControl`
 - Test suite with pytest
 
 ## Requirements
