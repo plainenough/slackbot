@@ -25,7 +25,7 @@ pipeline {
     stage('testing') {
       steps {
         sh "kubectl  --kubeconfig ../kubeconfig --insecure-skip-tls-verify get pods"
-        sh "pytest -v --junit-xml=results.xml"
+        sh "python3 -m pytest -v --junit-xml=results.xml"
       }
     }
     stage('Build') {

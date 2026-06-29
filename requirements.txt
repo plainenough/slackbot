@@ -1,5 +1,5 @@
-slack_sdk==3.1.0
-pyyaml
-aiohttp
-pytest==5.3.5
-pytest_cov==2.5.1
+slack_sdk>=3.27.0
+PyYAML>=6.0
+requests>=2.31.0
+pytest>=8.0
+pytest-cov>=4.1.0

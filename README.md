@@ -1,83 +1,111 @@
-# Slackbot - A python slackbot integration
+# Slackbot — Python Slack integration (v2)
+
 [![BCH compliance](https://bettercodehub.com/edge/badge/plainenough/slackbot?branch=master)](https://bettercodehub.com/)
-## Versioning 
-major.feature.patch-buildnumber
-* Major build numbers are always a breaking change, normally > 50% refactor.
-* Feature build numbers are never breaking and will result from adding new commands, or subtle changes like logging.
-* Patch build numbers are reserved for trivial changes like bugs or wording inside help docs. 
-* Build numbers only represent the amount of times Jenkins has attempted builds on the pipeline. 
 
-## Features:
-* Dynamically loads commands
-* Dynamically saves userdata
-* Fake internet points system
-* Banning system
-* Testing suite
+Modernized Slack bot using **Socket Mode** (RTM is deprecated). Same commands, fake internet points, bans, and dynamic plugin loading — with JSON persistence and Python 3.12 support.
 
-## Deployment instructions:
-Note: Use utils.create_config to generate a config template. This will
-also be done on initial launch.
+## Versioning
 
-### Requirements:
-* python 3.6 or higher
-* pip packages
-  * pyyaml
-  * slack_sdk
-  * pytest
-* docker
-* app setup with api key in existing slack install
+`major.feature.patch-buildnumber`
 
-### Testing:
+## Features
+
+- Dynamically loads commands from `commands/`
+- Fake internet points (`++` / `--`)
+- Admin ban / unban system
+- Socket Mode (no public URL required)
+- JSON persistence with pickle migration
+- Test suite with pytest
+
+## Requirements
+
+- Python 3.10+
+- Slack app with:
+  - **Bot Token** (`xoxb-...`) — scopes: `chat:write`, `app_mentions:read` (and any others your commands need)
+  - **App-Level Token** (`xapp-...`) — scope: `connections:write`
+  - **Socket Mode** enabled in the Slack app settings
+  - Event subscription: `message.channels`, `message.groups`, `message.im`, `message.mpim`
+
+## Setup
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+mkdir -p data
+cp data/config.example.yaml data/config.yaml
+# Edit data/config.yaml with your tokens and IDs
+python3 main.py
 ```
-# Root directory of the repo.
-export PYTHONPATH=$PWD
-# To execute tests
+
+Or generate a config template:
+
+```bash
+python3 -m utils.create_config
+```
+
+### Environment variables (optional)
+
+| Variable | Config key |
+|----------|------------|
+| `SLACK_BOT_TOKEN` | `BOT_TOKEN` |
+| `SLACK_APP_TOKEN` | `APP_TOKEN` |
+| `SLACK_BOT_ID` | `BOTID` |
+| `SLACK_BOT_USER_ID` | `BOTUSERID` |
+| `SLACK_BOT_NAME` | `BOTNAME` |
+| `SLACKBOT_CONFIG` | path to config file |
+
+## Testing
+
+```bash
 pytest -v
-# To see useful coverage map
-pytest -v --cov=commands --cov=fake_points --cov=message
+pytest -v --cov=commands --cov=fake_points --cov=message --cov=storage
 ```
 
-### Docker:
-```
+## Docker
+
+```bash
 docker build -t slackbot -f container/Dockerfile .
-docker run -v /absolute/path/data:/opt/slackbot/data --name=slackbot
+docker run -v /absolute/path/data:/opt/slackbot/data --name=slackbot slackbot
 ```
 
-This application exepects a config file in the mounted directory.
+Mount a directory containing `config.yaml` with your tokens.
 
+## Systemd (example)
 
-### Daemonized:
-* Target OS: Ubuntu 18 (Bionic)
-* Systemd Service File:
-```
+```ini
 [Unit]
-Description= Slackbot-Service
+Description=Slackbot Service
 After=network.target
-StartLimitIntervalSec=0
 
 [Service]
 Type=simple
 Restart=always
-RestartSec=1
+RestartSec=5
 User=slackbot
 WorkingDirectory=/opt/slackbot/
+Environment=SLACKBOT_CONFIG=/opt/slackbot/data/config.yaml
 ExecStart=/usr/bin/python3 /opt/slackbot/main.py
 
 [Install]
 WantedBy=multi-user.target
 ```
 
-### Instructions
-Commands are loaded on import and should contain the docstring from each
-command. Simply using the "help" command will trigger the bot to supply 
-the command and the docstring associated.
+## Commands
 
-You will need your bot ID and your general channel id. 
+Commands live in `commands/*.py` and register via an `alias()` function. The `help` command lists all registered commands and their docstrings.
 
-/commands are not implemented.
+You will need your bot ID, bot user ID, and admin user IDs in config.
 
-### TODO:
-* generate better user instructions
-* convert config to secondary option and retrieve config from environment variables
-* auto discover as much about the application as possible to reduce config
-* add assertions to testing
+Slash commands (`/command`) are not implemented.
+
+## Migration from v1 (RTM)
+
+1. Enable Socket Mode on your Slack app and create an app-level token
+2. Add `APP_TOKEN` to config (or `SLACK_APP_TOKEN` env var)
+3. Rename `TOKEN` to `BOT_TOKEN` if desired (both still work)
+4. On first run, existing `data/score` and `data/banned` pickle files migrate to JSON automatically
+
+## Notes
+
+Still a small team bot — not a Slack platform framework. Use responsibly.

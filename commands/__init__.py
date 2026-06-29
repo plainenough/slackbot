@@ -12,13 +12,15 @@ def discover_commands(logging):
     commands = {}
     logging.debug("Checking files in file list for py extention.")
     for item in file_list:
+        if not item.endswith(".py"):
+            continue
         logging.debug("Checking file: {0}".format(item))
-        if item.split('.')[1] == 'py':
-            if __name__ == '__main__':
-                _item = '{0}'.format(item.split('.')[0])
-            else:
-                _item = 'commands.{0}'.format(item.split('.')[0])
-            check_alias(logging, _item, commands)
+        module_name = item[:-3]
+        if __name__ == "__main__":
+            _item = module_name
+        else:
+            _item = "commands.{0}".format(module_name)
+        check_alias(logging, _item, commands)
     return commands
 
 
@@ -47,11 +49,8 @@ def filter_list(logging):
     MYWORKDIR = os.path.dirname(_mypath)
     logging.debug(MYWORKDIR)
     file_list = os.listdir(MYWORKDIR)
-    _removal_list = ['__init__.py', '__pycache__', 'template.py']
-    for item in _removal_list:
-        logging.debug("removing {0}".format(item))
-        file_list.remove(item)
-    return file_list
+    _removal_list = {"__init__.py", "__pycache__", "template.py"}
+    return [item for item in file_list if item not in _removal_list]
 
 
 if __name__ == '__main__':

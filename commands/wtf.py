@@ -26,7 +26,7 @@ def check_ud(term):
     import requests
     results = []
     msg = ''
-    url = 'http://api.urbandictionary.com/v0/define?term={0}'
+    url = "https://api.urbandictionary.com/v0/define?term={0}"
     search = requests.get(url.format(term))
     if search.ok:
         data = search.json()

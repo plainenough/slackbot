@@ -1,31 +1,24 @@
-# Base should be ubuntu 18
-FROM ubuntu:bionic
+FROM python:3.12-slim-bookworm
 
-# Some simple labels these just signify where it needs to go
-LABEL     org.label-schema.name="Slackbot" \
-          org.label-schema.description="Python-Bot for slack." \
-          org.label-schema.url="https://github.com/plainenough/slackbot.git" \
-          org.label-schema.vendor="Tosstalk.com" \
-          org.label-schema.version=1.0.1
+WORKDIR /opt/slackbot
 
-# Update the image
-RUN apt-get update -yqq &&\
-apt-get upgrade -yqq
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Install Python
-RUN apt-get install -yqq python3 python3-pip
-
-# Set Our Running Directory
-WORKDIR /opt/slackbot/
-
-# Copy all the code into the working directory
 COPY . /opt/slackbot
 
-# Volume
+RUN useradd --create-home --shell /usr/sbin/nologin slackbot && \
+    mkdir -p /opt/slackbot/data && \
+    chown -R slackbot:slackbot /opt/slackbot
+
+USER slackbot
+
 VOLUME /opt/slackbot/data
 
-# Install python requirements
-RUN pip3 install -r requirements.txt
+ENV SLACKBOT_CONFIG=/opt/slackbot/data/config.yaml
 
-# Finally run the code
-CMD python3 main.py
+CMD ["python3", "main.py"]
+
+LABEL org.opencontainers.image.title="Slackbot"
+LABEL org.opencontainers.image.description="Python Slack bot with Socket Mode"
+LABEL org.opencontainers.image.source="https://github.com/plainenough/slackbot"

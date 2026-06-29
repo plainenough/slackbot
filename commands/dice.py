@@ -12,7 +12,7 @@ def roll(**kwargs: dict) -> str:
     message = kwargs.get('message')
     _commands = []
     for com in message._text.split():
-        if com == 'roll' or '':
+        if com == "roll":
             continue
         _commands.append(com)
     return generate_message(_commands)

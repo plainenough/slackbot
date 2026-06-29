@@ -83,10 +83,11 @@ class Message(object):
 
     def check_bot(self):
         """Check if the message was sent from the bot user."""
-        if self._data.get('bot_id'):
-            if self._data.get('bot_id') == self._kwargs.get('botid'):
-                self.command = False
-        elif self.user == self._kwargs.get('botid'):
+        bot_id = self._kwargs.get("botid")
+        bot_user_id = self._kwargs.get("botuserid")
+        if self._data.get("bot_id") and self._data.get("bot_id") == bot_id:
+            self.command = False
+        elif self.user and (self.user == bot_user_id or self.user == bot_id):
             self.command = False
         return
 
