@@ -1,17 +1,8 @@
 """Test for help message generation."""
 
-
-import pytest
-
-
-class Message(object):
-    """Create simple message object."""
-
-    def __init__(self):
-        """Initialize simple testing object."""
-        self._list_commands = dict(mycmd=mycmd)
-        self._text = "help"
-        self.user = "bob"
+from access import AccessControl
+from context import CommandContext
+from commands import help as help_command
 
 
 def mycmd():
@@ -20,17 +11,25 @@ def mycmd():
 
 
 def test_alias():
-    """Test alias functionality in help commands."""
-    from commands import help
-    commands = help.alias()
-    assert 'help' in commands
+    commands = help_command.alias()
+    assert "help" in commands
 
 
 def test_printout():
-    """Test help message generation."""
-    from commands import help
-    message = Message()
-    kwargs = dict(message=message)
-    msg = '```mycmd                         : Return true.```'
-    assert msg == help.generate_help(**kwargs)
-    assert message.channel == "bob"
+    ctx = CommandContext(
+        actor_id="bob",
+        channel_id="C1",
+        text="help",
+        target_users=[],
+        access=AccessControl([], {}),
+        score={},
+        workdir="/tmp",
+        commands={"mycmd": mycmd},
+        reply_channel="C1",
+    )
+    result = help_command.generate_help(context=ctx)
+    assert "mycmd" in result
+    assert "Return true." in result
+    assert "Slash commands" in result
+    assert ctx.reply_channel == "bob"
+

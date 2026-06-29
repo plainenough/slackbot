@@ -3,19 +3,27 @@
 import pytest
 
 from access import AccessControl
-
-
-class StubMessage:
-    def __init__(self, user, channel="C1"):
-        self.user = user
-        self.channel = channel
-        self.msg = ""
-        self.banned = False
+from context import CommandContext
 
 
 @pytest.fixture
 def access():
     return AccessControl(["ADMIN1"], {"BANNED1": True})
+
+
+def _ctx(user, channel="C1", access_obj=None):
+    access_obj = access_obj or AccessControl(["ADMIN1"], {"BANNED1": True})
+    return CommandContext(
+        actor_id=user,
+        channel_id=channel,
+        text="help",
+        target_users=[],
+        access=access_obj,
+        score={},
+        workdir="/tmp",
+        commands={},
+        reply_channel=channel,
+    )
 
 
 def test_is_admin(access):
@@ -29,29 +37,28 @@ def test_is_banned(access):
 
 
 def test_block_if_banned(access):
-    message = StubMessage("BANNED1")
-    assert access.block_if_banned(message) is True
-    assert message.banned is True
-    assert "banned" in message.msg.lower()
-    assert message.channel == "BANNED1"
+    ctx = _ctx("BANNED1", access_obj=access)
+    blocked = access.block_if_banned(ctx)
+    assert blocked is not None
+    assert "banned" in blocked.lower()
+    assert ctx.reply_channel == "BANNED1"
 
 
 def test_block_if_not_banned(access):
-    message = StubMessage("USER1")
-    assert access.block_if_banned(message) is False
-    assert message.msg == ""
+    ctx = _ctx("USER1", access_obj=access)
+    assert access.block_if_banned(ctx) is None
 
 
 def test_require_admin(access):
-    message = StubMessage("ADMIN1")
-    assert access.require_admin(message) is None
+    ctx = _ctx("ADMIN1", access_obj=access)
+    assert access.require_admin(ctx) is None
 
 
 def test_require_admin_denied(access):
-    message = StubMessage("USER1", channel="CPUBLIC")
-    denied = access.require_admin(message)
+    ctx = _ctx("USER1", channel="CPUBLIC", access_obj=access)
+    denied = access.require_admin(ctx)
     assert denied == "<@USER1>, you are not an admin"
-    assert message.channel == "USER1"
+    assert ctx.reply_channel == "USER1"
 
 
 def test_ban_mutations(access):

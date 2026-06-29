@@ -1,9 +1,10 @@
 """Test ban functionality."""
 
-
 import pytest
 
 from access import AccessControl
+from context import CommandContext
+from commands import ban as ban_command
 
 banned = {"fred": True}
 
@@ -18,88 +19,92 @@ class Message(object):
         admin_list = ["bob"] if admins is None else admins
         self._kwargs = dict(banned=banned)
         self.access = AccessControl(admin_list, banned)
+        self.context = CommandContext(
+            actor_id=self.user,
+            channel_id=self.channel,
+            text=self._text,
+            target_users=[],
+            access=self.access,
+            score={},
+            workdir="/tmp",
+            commands={},
+            reply_channel=self.channel,
+        )
         self.admin = self.access.is_admin(self.user)
 
 
 @pytest.fixture
 def fixture_ban():
-    """Fixture to test ban user."""
-    from commands import ban
-
     message = Message()
-    kwargs = dict(user="jan", channel=message.channel, message=message)
-    result = ban.ban_user(**kwargs)
+    kwargs = dict(user="jan", channel=message.channel, message=message, context=message.context)
+    result = ban_command.ban_user(**kwargs)
     return kwargs, result
 
 
 @pytest.fixture
 def fixture_unban():
-    """Fixture to test unban user."""
-    from commands import ban
-
     message = Message()
-    kwargs = dict(user="fred", channel=message.channel, message=message)
-    result = ban.unban_user(**kwargs)
+    kwargs = dict(user="fred", channel=message.channel, message=message, context=message.context)
+    result = ban_command.unban_user(**kwargs)
     return kwargs, result
 
 
 @pytest.fixture
 def fixture_unbanall():
-    """Fixture to test unbanning all users."""
-    from commands import ban
-
     message = Message()
-    kwargs = dict(user="jan", channel=message.channel, message=message)
-    result = ban.unban_all(**kwargs)
+    kwargs = dict(user="jan", channel=message.channel, message=message, context=message.context)
+    result = ban_command.unban_all(**kwargs)
     return kwargs, result, banned
 
 
 @pytest.fixture
 def fixture_notadmin():
-    """Fixture to test non-admin command run."""
-    from commands import ban
-
     message = Message(admins=[])
-    kwargs = dict(user="jan", channel=message.channel, message=message)
-    ban_result = ban.ban_user(**kwargs)
-    unban_result = ban.unban_user(**kwargs)
-    unbanall_result = ban.unban_all(**kwargs)
-    return ban_result, unban_result, unbanall_result
+    message.context = CommandContext(
+        actor_id=message.user,
+        channel_id=message.channel,
+        text=message._text,
+        target_users=[],
+        access=message.access,
+        score={},
+        workdir="/tmp",
+        commands={},
+        reply_channel=message.channel,
+    )
+    kwargs = dict(user="jan", channel=message.channel, message=message, context=message.context)
+    return (
+        ban_command.ban_user(**kwargs),
+        ban_command.unban_user(**kwargs),
+        ban_command.unban_all(**kwargs),
+    )
 
 
 def test_alias():
-    """Test alias in commands.ban."""
-    from commands import ban
-
-    commands = ban.alias()
+    commands = ban_command.alias()
     assert "ban" in commands
     assert "unban" in commands
     assert "unbanall" in commands
 
 
 def test_unbanall(fixture_unbanall):
-    """Test unbanall functionality."""
-    kwargs, unbanall, unbanned = fixture_unbanall
+    kwargs, result, unbanned = fixture_unbanall
     assert unbanned == {}
-    assert unbanall == "Cleared the ban list"
+    assert result == "Cleared the ban list"
 
 
 def test_ban(fixture_ban):
-    """Test ban functionality."""
     kwargs, result = fixture_ban
     assert kwargs["message"].access.is_banned("jan")
     assert result == "User <@jan> is banned.\n"
 
 
 def test_unban(fixture_unban):
-    """Test unban functionality."""
     kwargs, result = fixture_unban
     assert not kwargs["message"].access.is_banned("fred")
     assert result == "User <@fred> is unbanned.\n"
 
 
 def test_notadmin(fixture_notadmin):
-    """Test non-admin filtering functionality."""
     ban_result, unban_result, unbanall_result = fixture_notadmin
     message = "<@bob>, you are not an admin"
     assert ban_result == message

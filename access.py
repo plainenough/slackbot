@@ -1,5 +1,12 @@
 """Authorization helpers for admin and ban checks."""
 
+from __future__ import annotations
+
+from typing import Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from context import CommandContext
+
 
 class AccessControl:
     """Centralized admin and ban policy for command execution."""
@@ -8,40 +15,36 @@ class AccessControl:
         self.admins = set(admins or [])
         self.banned = banned if banned is not None else {}
 
-    def is_admin(self, user_id):
+    def is_admin(self, user_id: Optional[str]) -> bool:
         return user_id in self.admins
 
-    def is_banned(self, user_id):
+    def is_banned(self, user_id: Optional[str]) -> bool:
         return user_id in self.banned
 
-    def ban_message(self):
+    def ban_message(self) -> str:
         return "You are banned. Please contact an admin."
 
-    def admin_denied_message(self, actor_id):
+    def admin_denied_message(self, actor_id: str) -> str:
         return "<@{0}>, you are not an admin".format(actor_id)
 
-    def block_if_banned(self, message):
-        """Stop command execution for banned users. Returns True if blocked."""
-        if not self.is_banned(message.user):
-            return False
-        message.msg = self.ban_message()
-        message.channel = message.user
-        message.banned = True
-        return True
-
-    def require_admin(self, message):
-        """Return an denial message for non-admins, otherwise None."""
-        if self.is_admin(message.user):
+    def block_if_banned(self, ctx: "CommandContext") -> Optional[str]:
+        if not self.is_banned(ctx.actor_id):
             return None
-        message.channel = message.user
-        return self.admin_denied_message(message.user)
+        ctx.dm_actor()
+        return self.ban_message()
 
-    def ban_user(self, user_id):
+    def require_admin(self, ctx: "CommandContext") -> Optional[str]:
+        if self.is_admin(ctx.actor_id):
+            return None
+        ctx.dm_actor()
+        return self.admin_denied_message(ctx.actor_id)
+
+    def ban_user(self, user_id: Optional[str]) -> None:
         if user_id and user_id != "none":
             self.banned[user_id] = True
 
-    def unban_user(self, user_id):
+    def unban_user(self, user_id: Optional[str]) -> None:
         self.banned.pop(user_id, None)
 
-    def unban_all(self):
+    def unban_all(self) -> None:
         self.banned.clear()

@@ -1,5 +1,8 @@
 """Ban command utilities."""
 
+from audit import record
+from context import get_context
+
 
 def alias():
     """Define separate commands and map them to functions."""
@@ -10,42 +13,38 @@ def alias():
     }
 
 
-def ban_user(**kwargs: dict) -> str:
+def ban_user(**kwargs):
     """Ban a user from using commands."""
+    ctx = get_context(kwargs)
     user = kwargs.get("user")
-    message = kwargs.get("message")
-    access = message.access
-    denied = access.require_admin(message)
+    denied = ctx.access.require_admin(ctx)
     if denied:
         return denied
     if user == "none":
         return ""
-    access.ban_user(user)
+    ctx.access.ban_user(user)
+    record(ctx.workdir, ctx.actor_id, "ban", target=user)
     return "User <@{0}> is banned.\n".format(user)
 
 
-def unban_all(**kwargs: dict) -> str:
+def unban_all(**kwargs):
     """Unban all users."""
-    message = kwargs.get("message")
-    access = message.access
-    denied = access.require_admin(message)
+    ctx = get_context(kwargs)
+    denied = ctx.access.require_admin(ctx)
     if denied:
         return denied
-    access.unban_all()
+    ctx.access.unban_all()
+    record(ctx.workdir, ctx.actor_id, "unbanall")
     return "Cleared the ban list"
 
 
-def unban_user(**kwargs: dict) -> str:
+def unban_user(**kwargs):
     """Unban an existing user ban."""
+    ctx = get_context(kwargs)
     user = kwargs.get("user")
-    message = kwargs.get("message")
-    access = message.access
-    denied = access.require_admin(message)
+    denied = ctx.access.require_admin(ctx)
     if denied:
         return denied
-    access.unban_user(user)
+    ctx.access.unban_user(user)
+    record(ctx.workdir, ctx.actor_id, "unban", target=user)
     return "User <@{0}> is unbanned.\n".format(user)
-
-
-if __name__ == "__main__":
-    print("RTFM")

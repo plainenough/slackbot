@@ -2,7 +2,7 @@
 
 [![BCH compliance](https://bettercodehub.com/edge/badge/plainenough/slackbot?branch=master)](https://bettercodehub.com/)
 
-Modernized Slack bot using **Socket Mode** (RTM is deprecated). Same commands, fake internet points, bans, and dynamic plugin loading — with JSON persistence and Python 3.12 support.
+Modernized Slack bot using **Socket Mode** (RTM is deprecated). Same personality — fake internet points, bans, dice, help — with a cleaner architecture, slash commands, audit logging, and Python 3.12 support.
 
 ## Versioning
 
@@ -10,22 +10,50 @@ Modernized Slack bot using **Socket Mode** (RTM is deprecated). Same commands, f
 
 ## Features
 
-- Dynamically loads commands from `commands/`
-- Fake internet points (`++` / `--`)
-- Admin ban / unban system
-- Socket Mode (no public URL required)
-- JSON persistence with pickle migration
-- Centralized admin/ban checks via `AccessControl`
-- Test suite with pytest
+- **Socket Mode** — no public URL required
+- **Text commands** — `roll d20`, `ban <@user>`, `++` / `--`, etc.
+- **Slash commands** — `/roll`, `/ban`, `/mypoints`, `/scoreboard`, `/help`, `/wtf`, …
+- **Fake internet points** with leaderboard medals and score deltas
+- **Admin ban/unban** with centralized `AccessControl`
+- **Audit log** — `data/audit.jsonl` for admin actions
+- **JSON persistence** with automatic pickle migration
+- **Dynamic command plugins** in `commands/`
+- **53 tests** + mypy on core modules
+
+## Architecture
+
+| Module | Role |
+|--------|------|
+| `message_parser.py` | Parse Slack events and slash payloads |
+| `dispatcher.py` | Route parsed input to command handlers |
+| `context.py` | `CommandContext` passed to every command |
+| `access.py` | Admin/ban policy |
+| `audit.py` | Append-only admin audit log |
+| `scoreboard.py` | FIP leaderboard formatting + snapshots |
+| `storage.py` | JSON persistence for score/ban data |
 
 ## Requirements
 
 - Python 3.10+
 - Slack app with:
-  - **Bot Token** (`xoxb-...`) — scopes: `chat:write`, `app_mentions:read` (and any others your commands need)
-  - **App-Level Token** (`xapp-...`) — scope: `connections:write`
-  - **Socket Mode** enabled in the Slack app settings
-  - Event subscription: `message.channels`, `message.groups`, `message.im`, `message.mpim`
+  - **Bot Token** (`xoxb-...`) — `chat:write` and related scopes
+  - **App-Level Token** (`xapp-...`) — `connections:write`
+  - **Socket Mode** enabled
+  - Event subscriptions: `message.channels`, `message.groups`, `message.im`, `message.mpim`
+  - Slash commands registered in the Slack app (see below)
+
+### Slash commands to register
+
+| Command | Description |
+|---------|-------------|
+| `/help` | List commands |
+| `/roll` | Roll dice (`/roll d20`) |
+| `/ban` | Ban a user |
+| `/unban` | Unban a user |
+| `/unbanall` | Clear ban list (admin) |
+| `/mypoints` | Show your FIP score |
+| `/scoreboard` | Show team leaderboard (admin) |
+| `/wtf` | Urban Dictionary lookup |
 
 ## Setup
 
@@ -39,7 +67,7 @@ cp data/config.example.yaml data/config.yaml
 python3 main.py
 ```
 
-Or generate a config template:
+Generate a config template:
 
 ```bash
 python3 -m utils.create_config
@@ -56,11 +84,12 @@ python3 -m utils.create_config
 | `SLACK_BOT_NAME` | `BOTNAME` |
 | `SLACKBOT_CONFIG` | path to config file |
 
-## Testing
+## Testing & quality
 
 ```bash
 pytest -v
-pytest -v --cov=commands --cov=fake_points --cov=message --cov=storage
+pytest -v --cov=commands --cov=access --cov=dispatcher --cov=message_parser
+mypy access.py bot_state.py context.py dispatcher.py message_parser.py storage.py audit.py scoreboard.py main.py
 ```
 
 ## Docker
@@ -70,42 +99,18 @@ docker build -t slackbot -f container/Dockerfile .
 docker run -v /absolute/path/data:/opt/slackbot/data --name=slackbot slackbot
 ```
 
-Mount a directory containing `config.yaml` with your tokens.
+## Admin behavior
 
-## Systemd (example)
-
-```ini
-[Unit]
-Description=Slackbot Service
-After=network.target
-
-[Service]
-Type=simple
-Restart=always
-RestartSec=5
-User=slackbot
-WorkingDirectory=/opt/slackbot/
-Environment=SLACKBOT_CONFIG=/opt/slackbot/data/config.yaml
-ExecStart=/usr/bin/python3 /opt/slackbot/main.py
-
-[Install]
-WantedBy=multi-user.target
-```
-
-## Commands
-
-Commands live in `commands/*.py` and register via an `alias()` function. The `help` command lists all registered commands and their docstrings.
-
-You will need your bot ID, bot user ID, and admin user IDs in config.
-
-Slash commands (`/command`) are not implemented.
+- Non-admins running admin commands get a **DM**: `<@you>, you are not an admin`
+- Banned users get a **DM**: `You are banned. Please contact an admin.`
+- Admin actions are logged to `data/audit.jsonl`
 
 ## Migration from v1 (RTM)
 
-1. Enable Socket Mode on your Slack app and create an app-level token
-2. Add `APP_TOKEN` to config (or `SLACK_APP_TOKEN` env var)
-3. Rename `TOKEN` to `BOT_TOKEN` if desired (both still work)
-4. On first run, existing `data/score` and `data/banned` pickle files migrate to JSON automatically
+1. Enable Socket Mode and create an app-level token
+2. Add `APP_TOKEN` to config
+3. Register slash commands in the Slack app manager
+4. Existing pickle `score` / `banned` files migrate to JSON on first run
 
 ## Notes
 
